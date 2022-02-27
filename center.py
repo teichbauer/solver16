@@ -1,9 +1,9 @@
-import json
+# from cnode import CNode
 
 
 class Center:
     maxnov = 0
-    satbits = set([])
+    satbits = {}
     bits = set([])
     sats = []
     limit = 10
@@ -15,6 +15,10 @@ class Center:
         cls.bits = set(range(nov))
 
     @classmethod
-    def add_satbits(cls, bits):
-        cls.satbits.update(bits)
+    def add_satbits(cls, snode):  # bits):
+        if snode.nov == cls.maxnov:
+            return
+        bits = snode.bgrid.bitset
+        for b in bits:
+            cls.satbits.setdefault(b, []).append(snode)
         cls.bits -= bits

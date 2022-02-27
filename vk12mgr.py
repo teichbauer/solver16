@@ -180,10 +180,12 @@ class VK12Manager:
 
     def remove_vk(self, kn):
         the_vk = self.vkdic.get(kn, None)
-        if the_vk and the_vk.nob == 1:
-            return self.remove_vk1(kn)
-        elif the_vk and the_vk.nob == 2:
-            return self.remove_vk2(kn)
+        if the_vk:
+            if the_vk.nob == 1:
+                return self.remove_vk1(kn)
+            elif the_vk.nob == 2:
+                return self.remove_vk2(kn)
+        return None
 
     def remove_vk1(self, kname):
         if kname not in self.kn1s:

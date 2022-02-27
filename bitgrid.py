@@ -110,9 +110,9 @@ class BitGrid:
             self.vk12sumbits.update(vk.bits)
             for b in vk.bits:
                 self.vk12bitdic.setdefault(b, set([])).add(vk.kname)
-        self.vk12dic_bits = {k: set([]) for k in snode.vk12dics}
-        for k in snode.vk12dics:
-            for vk in snode.vk12dics[k].values():
+        self.vk12dic_bits = {k: set([]) for k in snode.vk12mdic}
+        for k in snode.vk12mdic:
+            for vk in snode.vk12mdic[k].vkdic.values():
                 self.vk12dic_bits[k].update(vk.bits)
         x = 1
 

@@ -1,3 +1,5 @@
+2022-02-27->0.294
+- progressin CNode
 2022-02-20->0.293
 - branching off solver15: solver13 was 2.5 secs, faster than solver15(4secs)
   that's because in solver15, I add all vk12s to every pvname/vkm12.
