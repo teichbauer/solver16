@@ -31,7 +31,7 @@ class CNode:
             vkm = vk12m.clone()  # clone of 60.1 vkm
 
             # bs has 1 or 2 bits in it
-            vkmx = self.proc_satbits(self.nxt_sn, vkm, bs, blocks)
+            vkmx = self.handle_bs(self.nxt_sn, bs, blocks)
             if vkmx:
                 cn = CNode(self.nov - 3, ch, vkmx)
                 cn.find_paths(blocks)

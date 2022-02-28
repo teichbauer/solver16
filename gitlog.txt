@@ -1,5 +1,10 @@
-2022-02-27->0.294
-- progressin CNode
+2022-02-28->0.294
+- Center.set_satbits, that:
+  set front_kns (vks in a child-vkm, with oth of its bits in satbits);
+  tail_kns(vks with both of its bits in tail-bits(not-satbits)); and
+  tailpart_kns(vks with at least 1 bit in tail-bits)
+- Center.set_lower_snodes setting snode's snodes-list(descending in nov) with lower
+  nov than snode.nov
 2022-02-20->0.293
 - branching off solver15: solver13 was 2.5 secs, faster than solver15(4secs)
   that's because in solver15, I add all vk12s to every pvname/vkm12.

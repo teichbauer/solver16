@@ -40,7 +40,7 @@ class SatNode:
                restriction(restrictive vk2) on this ch-head/value.
             3. make next-choice from vkm - if not empty, if it is empty,no .next
             """
-        Center.add_satbits(self)
+        Center.satbitdic.update({b: self for b in self.bgrid.bits})
         self.chdic = {}
         # each vk12 in here is referred by from vk12 in each self.vk12dics[v]
         self.sumvk12dic = {}  # all vk12s from touched.
@@ -58,6 +58,12 @@ class SatNode:
             self.bgrid.get_vk12bits(self)
     # ---- def split_vkm(self) --------
 
+    def set_blocks(self):
+        for chv, vkm in self.vk12mdic.items():
+            for sn in self.lower_snodes:
+                x = 0
+                pass
+
     def spawn(self):
         if len(self.vkm.vkdic) > 0:
             self.next = SatNode(self,  # parent
@@ -66,7 +72,12 @@ class SatNode:
             return self.next.spawn()
         else:
             Center.last_nov = self.nov
-            Center.satbitset = set(Center.satbits)
+            Center.novs = sorted([n for n in Center.snodes], reverse=True)
+            Center.set_lower_snodes()
+            Center.set_satbits()
+            for nov, sn in Center.snodes.items():
+                sn.set_blocks()
+
             snode = Center.root_snode
             for ch in snode.bgrid.chheads:
                 cn = CNode(Center.maxnov, ch, snode.vk12mdic[ch])
