@@ -20,16 +20,17 @@ class BitGrid:
         self.bitset = set(choice["bits"])
         self.avks = choice["avks"]
         self.covers = tuple(vk.cmprssd_value() for vk in self.avks)
-        self.chheads = tuple(v for v in range(8) if v not in self.covers)
+        chlst = [v for v in range(8) if v not in self.covers]
+        self.chvset = frozenset(chlst)
 
     def filter_pvs(self, pvk12m):
         " among pkv12m, see if local ch-v can be put into lnvkmdic."
-        lvkmdic = {h: VK12Manager() for h in self.chheads}
+        lvkmdic = {h: VK12Manager() for h in self.chvset}
         for vk in pvk12m.vkdic.values():
             # inside a pv-vkm, loop thru all vks(all vk here are vk12)
             lbs = self.bitset.intersection(vk.bits)
             if len(lbs) == 0:
-                for ch in self.chheads:
+                for ch in self.chvset:
                     if ch in lvkmdic:
                         lvkmdic[ch].add_vk(vk)
                         if not lvkmdic[ch].valid:
@@ -39,7 +40,7 @@ class BitGrid:
                 if len(lbs) == 1:
                     b = lbs.pop()  # vk.bits[0]
                     if vk.nob == 1:
-                        for lv in self.chheads:  # ch-head is covered by cvs,
+                        for lv in self.chvset:  # ch-head is covered by cvs,
                             if lv in lvkmdic:
                                 # then this lv should not be pv-vkm's path down
                                 if lv in cvs:
@@ -48,7 +49,7 @@ class BitGrid:
                                 # so, this vk shouldn't be added to pv-path
                                 # although this pv-path shouldn't be remvoed
                     else:  # vk.nob == 2, with 1 bit in self.bits
-                        for lv in self.chheads:
+                        for lv in self.chvset:
                             if lv in lvkmdic:
                                 # 1 bit from vk is hit: drop the bit vk2->vk1
                                 if lv in cvs:
@@ -59,7 +60,7 @@ class BitGrid:
                                  # else: lv not in cvs of vk: this vk is
                                  # for sure a NOT-hit:this vk will not be added
                 else:  # lbs length: 2
-                    for lv in self.chheads:
+                    for lv in self.chvset:
                         if lv in lvkmdic:
                             if lv in cvs:
                                 del lvkmdic[lv]
@@ -77,7 +78,7 @@ class BitGrid:
     def reduce_cvs(self, vk12m):
         """ for every vk in vk12m.vkdic, if vk is totally within grid,
             """
-        cvs_set = set(self.chheads)
+        cvs_set = set(self.chvset)
         kns = vk12m.kn1s + vk12m.kn2s
         for kn in kns:
             vk = vk12m.vkdic[kn]

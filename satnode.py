@@ -34,7 +34,7 @@ class SatNode:
         """ 1. pop-out touched-vk3s forming sumvk2dic with them
             2. tdic: keyed by cvs of vks and values are lists of vks
                this results in self.vk12dics dict, keyed by the possible
-               grid-values(bgrid/chheads), vkdics restricting the value
+               grid-values(bgrid/chvset), vkdics restricting the value
                if vk2dics misses a chhead-value, that doesn't mean, this value
                if not allowed - quite the opposite: This means that there is no
                restriction(restrictive vk2) on this ch-head/value.
@@ -45,7 +45,7 @@ class SatNode:
         self.chdic = {}
         # each vk12 in here is referred by from vk12 in each self.vk12dics[v]
         self.sumvk12dic = {}  # all vk12s from touched.
-        self.vk12mdic = {v: VK12Manager() for v in self.bgrid.chheads}
+        self.vk12mdic = {v: VK12Manager() for v in self.bgrid.chvset}
         for kn in self.touched:
             vk = self.vkm.pop_vk(kn)
             cvs, outdic = self.bgrid.cvs_and_outdic(vk)
@@ -80,7 +80,7 @@ class SatNode:
                 sn.set_blocks()
 
             snode = Center.root_snode
-            for ch in snode.bgrid.chheads:
+            for ch in snode.bgrid.chvset:
                 cn = CNode(Center.maxnov, ch, snode.vk12mdic[ch])
                 cn.find_paths()
                 if cn.valid:

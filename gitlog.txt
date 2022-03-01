@@ -1,3 +1,9 @@
+2022-03-01->0.296
+- bgrid.chheads -> chvset (a set of ch-head-values, no more a tuple)
+- touched kns calculated in cnode.find_paths, in stead of in cnode.handle_bs
+  cnode.handle_bs renamed to handle_kns
+- refactorings in conde.find_paths and handle_kns
+- vk12m add bits_kns: return set of kns touched by bits given
 2022-02-28->0.295
 - progreeing on cnode and satnode
 2022-02-28->0.294
