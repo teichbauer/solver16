@@ -60,8 +60,12 @@ class CNode:
             chcks.append((cvs, vkx, blckx))
         dic = {}
         for ch in chs:
-            blcks = blocks.copy()
             vkmx = self.vkm.clone()     # self.vkm with all kns removed
+            vkmx.add_vkdic(nxsn.vk12mdic[ch].vkdic)
+            if not vkmx.valid:
+                blocks[nxsn.nov].add(ch)
+                break
+            blcks = blocks.copy()
             for ck in chcks:            # for every kn removed, loop
                 if ch in ck[0]:         # if the vk1 is relevant for ch
                     vkmx.add_vk(ck[1])  # add this vk1 to vkmx

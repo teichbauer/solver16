@@ -143,7 +143,7 @@ class BitGrid:
                 cvs = vk.cmprssd_value()
             elif vk.nob < 3:  # cvs is a list of values
                 cvs = self.vary_1bit(v, g, cvs)  # TB verified
-            return cvs, None
+            return cvs, out_dic
 
         if odic_ln == 3:
             raise Exception("vk3!")
