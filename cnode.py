@@ -12,24 +12,20 @@ class CNode:
         else:
             self.nxt_sn = None
 
-    def cn_name(self):
-        return f"{self.nov}.{self.v}"
-
     def find_paths(self, blocks=None):
         if blocks == None:
             blocks = set([])
-        all_bs = Center.satbitset.intersection(self.vkm.bdic)
+        all_bs = Center.satbits.intersection(self.vkm.bdic)
         # what vkm(60.1) covering 57's 3 bits
         bs = self.nxt_sn.bgrid.bitset.intersection(all_bs)
         if len(bs) == 0:  # if not touching any of 57's 3 bits
             dic = {ch: (self.vkm, blocks) for ch in self.nxt_sn.bgrid.chheads}
         else:
             dic = self.handle_bs(self.nxt_sn, bs, blocks)
-
+        # TBD 2022-03-01
         for ch, vk12m in self.nxt_sn.vk12mdic.items():
             # for each 57.0(vkm), 57.2(vkm), ..., 57.6(vkm), 57.7(vkm)
             vkm = vk12m.clone()  # clone of 60.1 vkm
-
             # bs has 1 or 2 bits in it
             vkmx = self.handle_bs(self.nxt_sn, bs, blocks)
             if vkmx:
@@ -53,7 +49,6 @@ class CNode:
                     if ch in cvs:
                         blocks.add((sn.nov, ch))
             chcks.append((cvs, out, VKlause(vk.kname, out)))
-
         dic = {}
         for ch in sn.bgrid.chheads:
             if (sn.nov, ch) in blocks:
@@ -67,10 +62,13 @@ class CNode:
                         blcks.add((sn.nov, ch))
                         break
                     if ck[2].bits[0] in Center.satbits:
-                        for n in Center.satbits[ck[2].bits[0]]:
-                            cvx, outs = n.bgrid.cvs_and_outdic(ck[2])
-                            for c in n.bgrid.chheads:
-                                if c in cvx:
-                                    blcks.add((n.nov, c))
+                        snode = Center.satbitdic[ck[2].bits[0]]
+                        cvx, outs = snode.bgrid.cvs_and_outdic(ck[2])
+                        for c in snode.bgrid.chheads:
+                            if c in cvx:
+                                blcks.add((snode.nov, c))
             dic[ch] = (vkmx, blcks)
         return dic
+
+    def cn_name(self):
+        return f"{self.nov}.{self.v}"

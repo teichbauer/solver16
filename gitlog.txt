@@ -1,3 +1,5 @@
+2022-02-28->0.295
+- progreeing on cnode and satnode
 2022-02-28->0.294
 - Center.set_satbits, that:
   set front_kns (vks in a child-vkm, with oth of its bits in satbits);
