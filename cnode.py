@@ -29,12 +29,12 @@ class CNode:
         else:
             kns = self.vkm.bits_kns(bs)
             dic = self.handle_kns(nxsn, nxt_chs, kns, blocks)
-        # TBD 2022-03-01
-        for ch, tpl in dic.items():
-            # for each 57.0(vkm), 57.2(vkm), ..., 57.6(vkm), 57.7(vkm)
-            cn = CNode(self.nov - 3, ch, tpl[0], self)
-            cn.find_paths(tpl[1])
-            nxsn.chdic[ch] = cn
+        if len(dic) > 0:
+            for ch, tpl in dic.items():
+                # for each 57.0(vkm), 57.2(vkm), ..., 57.6(vkm), 57.7(vkm)
+                cn = CNode(self.nov - 3, ch, tpl[0], self)  # tpl[0]: vkm[ch]
+                cn.find_paths(tpl[1])   # tpl[1]: block-dic for ch
+                nxsn.chdic[ch] = cn
         x = 1
 
     def handle_kns(self, nxsn, chs, kns, blocks):
@@ -49,35 +49,39 @@ class CNode:
                 for ch in nxsn.bgrid.chvset:
                     if ch in cvs:
                         blocks.setdefault(nxsn.nov, set([])).add(ch)
-            vkx = VKlause(vk.kname, out)
-            blckx = {}
-            if vkx.bits[0] in Center.satbits:
-                lower_sn = Center.satbitdic[vkx.bits[0]]
-                cvx, outx = lower_sn.bgrid.cvs_and_outdic(vkx)
-                for c in lower_sn.bgrid.chvset:
-                    if c in cvx:
-                        blckx.setdefault(lower_sn.nov, set([])).add(c)
-            chcks.append((cvs, vkx, blckx))
+            else:
+                vkx = VKlause(vk.kname, out)
+                blckx = {}
+                if vkx.bits[0] in Center.satbits:
+                    lower_sn = Center.satbitdic[vkx.bits[0]]
+                    cvx, outx = lower_sn.bgrid.cvs_and_outdic(vkx)
+                    for c in lower_sn.bgrid.chvset:
+                        if c in cvx:
+                            blckx.setdefault(lower_sn.nov, set([])).add(c)
+                chcks.append((cvs, vkx, blckx))
         dic = {}
         for ch in chs:
+            if ch in blocks[nxsn.nov]:
+                continue
             vkmx = self.vkm.clone()     # self.vkm with all kns removed
             vkmx.add_vkdic(nxsn.vk12mdic[ch].vkdic)
             if not vkmx.valid:
                 blocks[nxsn.nov].add(ch)
-                break
-            blcks = blocks.copy()
+                continue
+            nx_blocks = blocks.copy()
             for ck in chcks:            # for every kn removed, loop
                 if ch in ck[0]:         # if the vk1 is relevant for ch
                     vkmx.add_vk(ck[1])  # add this vk1 to vkmx
                     if not vkmx.valid:
-                        blcks.setdefault(nxsn.nov, set([])).add(ch)
+                        blocks.setdefault(nxsn.nov, set([])).add(ch)
                         break
                     if len(ck[2]) > 0:
                         # ck[2] has only 1 key/value pair
                         # tuple(ck[2].items())[0] is that pair
                         nv, vset = tuple(ck[2].items())[0]
-                        blcks.setdefault(nv, set([])).update(vset)
-            dic[ch] = (vkmx, blcks)
+                        nx_blocks.setdefault(nv, set([])).update(vset)
+            if ch not in blocks[nxsn.nov]:
+                dic[ch] = (vkmx, nx_blocks)
         return dic
 
     def name(self):
