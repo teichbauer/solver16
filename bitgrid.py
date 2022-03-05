@@ -117,6 +117,18 @@ class BitGrid:
                 self.vk12dic_bits[k].update(vk.bits)
         x = 1
 
+    def find_blocks(self, vks):
+        # list of kns that should be ignored for a chv
+        # if this chv is blocked, this entry is removed from knsdic
+        knsdic = {ch: [] for ch in self.chvset}
+        for vk in vks:
+            cvs, out = self.cvs_and_outdic(vk)
+            for chv in knsdic:
+                if chv in cvs:
+                    knsdic[chv].append(vk.kname)
+                else:
+                    pass
+
     def cvs_and_outdic(self, vk):
         g = [2, 1, 0]
         # for a vk touched by grid-bits (1 or 2 bits)

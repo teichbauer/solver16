@@ -8,6 +8,7 @@ class Center:
     sats = []
     limit = 10
     snodes = {}
+    pathroots = {}
 
     @classmethod
     def set_maxnov(cls, nov):
@@ -40,6 +41,15 @@ class Center:
                 vkm.front_kns = all_kns - kns
                 x = 0
             nov -= 3
+
+    @classmethod
+    def sat_pathup(cls, snode):
+        if snode.nov == cls.maxnov:
+            return snode.solve()
+        for name, vkm in snode.chdic.items():
+            x = 1
+
+        cls.sat_pathup(snode.parent)
 
     @classmethod
     def set_lower_snodes(cls):

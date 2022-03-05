@@ -21,12 +21,18 @@ class VK12Manager:
         self.info = []
 
     def bits_kns(self, bits):
-        kns = set(self.bdic[bits.pop()])
-        while len(bits):
-            ks = self.bdic[bits.pop()]
-            for k in ks:
-                kns.add(k)
+        kns = set([])
+        for b in bits:
+            if b in self.bdic:
+                for k in self.bdic[b]:
+                    kns.add(k)
         return kns
+        # kns = set(self.bdic[bits.pop()])
+        # while len(bits):
+        #     ks = self.bdic[bits.pop()]
+        #     for k in ks:
+        #         kns.add(k)
+        # return kns
 
     def clone(self, deep=True):
         # self.valid must be True. Construct with: no vkdic, raw=True(no reset)

@@ -4,7 +4,7 @@ from vk12mgr import VK12Manager
 from bitgrid import BitGrid
 from center import Center
 from cnode import CNode
-from basics import display_vkdic, ordered_dic_string, testing
+from basics import display_vkdic, ordered_dic_string, verify_sat
 
 
 class SatNode:
@@ -59,9 +59,10 @@ class SatNode:
             self.bgrid.get_vk12bits(self)
     # ---- def split_vkm(self) --------
 
-    def set_blocks(self):
+    def sat_paths(self):
         for chv, vkm in self.vk12mdic.items():
             cn = CNode(self.nov, chv, vkm)
+            Center.pathroots[cn.name] = cn
             cn.find_paths()
             x = 1
 
@@ -74,18 +75,21 @@ class SatNode:
         else:
             Center.last_nov = self.nov
             Center.novs = sorted([n for n in Center.snodes], reverse=True)
-            Center.set_lower_snodes()
+            # Center.set_lower_snodes()
             Center.set_satbits()
-            for nov, sn in Center.snodes.items():
-                sn.set_blocks()
+            for ch in self.bgrid.chvset:
+                self.chdic[f"{self.nov}.{ch}"] = self.vk12mdic[ch]
+                # self.recognize_parents(ch)
+            Center.sat_pathup(self)
+            # Center.snodes[Center.maxnov].sat_paths()
 
-            snode = Center.root_snode
-            for ch in snode.bgrid.chvset:
-                cn = CNode(Center.maxnov, ch, snode.vk12mdic[ch])
-                cn.find_paths()
-                if cn.valid:
-                    self.chdic[ch] = cn
-            return self.solve()
+            # snode = Center.root_snode
+            # for ch in snode.bgrid.chvset:
+            #     cn = CNode(Center.maxnov, ch, snode.vk12mdic[ch])
+            #     cn.find_paths()
+            #     if cn.valid:
+            #         self.chdic[ch] = cn
+            # return self.solve()
 
     def solve(self):
         for pname, vkm in self.chdic.items():
@@ -125,3 +129,17 @@ class SatNode:
                     st[b] = v
                     sats.append(st)
         return sats, vk12m
+
+    def recognize_parents(self, ch):
+        psnode = Center.snodes[self.nov + 3]
+        mysat = self.bgrid.grid_sat(ch)
+        for pv, pvkm in psnode.vk12mdic.items():
+            vkm = pvkm.clone()
+            # vkm = self.vk12mdic[ch].clone()
+            vkm.add_vkdic(self.vk12mdic[ch].vkdic)
+            if vkm.valid:
+                mysat.update(psnode.bgrid.grid_sat(pv))
+                kns = vkm.bits_kns(self.bgrid.bits)
+                vks = {kn: vkm.vkdic[kn] for kn in kns}
+                if verify_sat(vks, mysat):
+                    psnode.chdic[f"{psnode.nov}.{pv}-{self.nov}.{ch}"] = vkm

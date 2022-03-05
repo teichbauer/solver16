@@ -1,5 +1,6 @@
 from vklause import VKlause
 from center import Center
+from pdb import set_trace
 
 
 class CNode:
@@ -8,12 +9,14 @@ class CNode:
         self.nov = nov  # example: 60
         self.v = v      # example: 1 - 60.1
         self.vkm = vkm
+        self.alive = True
 
     def find_paths(self, blocks=None):
         if blocks == None:
             blocks = {}
         if self.nov == Center.last_nov:
-            self.make_sat(blocks)
+            set_trace()
+            self.make_sat()
             return
         nxsn = Center.snodes[self.nov - 3]
         all_bs = Center.satbits.intersection(self.vkm.bdic)
@@ -25,17 +28,35 @@ class CNode:
         # what vkm(60.1) covering 57's 3 bits
         bs = nxsn.bgrid.bitset.intersection(all_bs)
         if len(bs) == 0:  # if not touching any of 57's 3 bits
-            dic = {ch: (self.vkm, blocks) for ch in nxt_chs}
+            self.brchdic = {ch: (self.vkm, blocks) for ch in nxt_chs}
         else:
             kns = self.vkm.bits_kns(bs)
-            dic = self.handle_kns(nxsn, nxt_chs, kns, blocks)
-        if len(dic) > 0:
-            for ch, tpl in dic.items():
-                # for each 57.0(vkm), 57.2(vkm), ..., 57.6(vkm), 57.7(vkm)
-                cn = CNode(self.nov - 3, ch, tpl[0], self)  # tpl[0]: vkm[ch]
+            self.brchdic = self.handle_kns(nxsn, nxt_chs, kns, blocks)
+        if len(self.brchdic) > 0:
+            # can not loop with brchdic.items(), for brchdic may be reduced
+            bks = list(self.brchdic.keys())
+            for bk in bks:
+                tpl = self.brchdic[bk]
+                cn = CNode(self.nov - 3, bk, tpl[0], self)  # tpl[0]: vkm[bk]
                 cn.find_paths(tpl[1])   # tpl[1]: block-dic for ch
-                nxsn.chdic[ch] = cn
+            # for ch, tpl in self.brchdic.items():
+            #     cn = CNode(self.nov - 3, ch, tpl[0], self)  # tpl[0]: vkm[ch]
+            #     cn.find_paths(tpl[1])   # tpl[1]: block-dic for ch
+        else:
+            self.die()
         x = 1
+
+    def die(self):
+        msg = f"{self.get_name_chain()}"
+        # print(f"{msg} dying.")
+        self.alive = False
+        if self.parent:
+            del self.parent.brchdic[self.v]
+            if len(self.parent.brchdic) == 0:
+                self.parent.die()
+        else:
+            msg = f"{self.name()} is dead"
+            print(msg)
 
     def handle_kns(self, nxsn, chs, kns, blocks):
         chcks = []
@@ -85,15 +106,37 @@ class CNode:
         return dic
 
     def name(self):
-        return f"{self.nov}.{self.v}"
+        return (self.nov, self.v)
 
-    def get_name_chain(self):
-        name_chain = [(self.nov, self.v)]
+    def get_satpath(self):
+        lst = [self.name()]
         p = self.parent
         while p:
-            name_chain.insert(0, (p.nov, p.v))
+            lst.insert(0, p.name())
             p = p.parent
-        return name_chain
+        return lst
 
-    def make_sat(self, blocks):
-        x = 1
+    def get_name_chain(self):
+        path = self.get_satpath()
+        return path
+
+    def make_sat(self):
+        path = self.get_satpath()
+        sats = []
+        rsat = {}
+        sbits = list(Center.satbits)
+        for pair in path:
+            rsat.update(Center.snodes[pair[0]].bgrid.grid_sat(pair[1]))
+        for kn in self.vkm.kn1s:
+            vk1 = self.vkm.remove_vk1(kn)
+            bit, v = vk1.hbit_value()
+            sbits.remove(bit)
+            rsat[bit] = int(not(v))
+        if len(sbits) > 0:
+            xsat = rsat.copy()
+            for b in sbits:
+                for v in (0, 1):
+                    xsat[b] = v
+            sats.append(xsat)
+        else:
+            x = 0
