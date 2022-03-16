@@ -5,6 +5,7 @@ from center import Center
 from satholder import SatHolder
 from satnode import SatNode
 from vkmgr import VKManager
+from vk12mgr import VK12Manager
 from vklause import VKlause
 
 

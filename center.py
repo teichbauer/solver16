@@ -1,4 +1,4 @@
-# from cnode import CNode
+from basics import verify_sat
 
 
 class Center:
@@ -8,12 +8,20 @@ class Center:
     sats = []
     limit = 10
     snodes = {}
-    pathroots = {}
+    sumvk12m = {}  # snode.nov: snode.sumvk12dic
+    sumbdic = {}
+    orig_vkm = None
 
     @classmethod
     def set_maxnov(cls, nov):
         cls.maxnov = nov
         cls.bits = set(range(nov))
+
+    @classmethod
+    def set_blinks(cls):
+        nov = cls.maxnov
+        x = 1
+        # sn = cls.snodes[nov]
 
     @classmethod
     def set_satbits(cls):
@@ -43,18 +51,31 @@ class Center:
             nov -= 3
 
     @classmethod
-    def sat_pathup(cls, snode):
-        if snode.nov == cls.maxnov:
-            return snode.solve()
-        for name, vkm in snode.chdic.items():
-            x = 1
-
-        cls.sat_pathup(snode.parent)
-
-    @classmethod
-    def set_lower_snodes(cls):
-        for nov, sn in cls.snodes.items():
-            if nov > cls.last_nov:
-                index = cls.novs.index(sn.nov)
-                ns = cls.novs[index+1:]
-                sn.lower_snodes = [cls.snodes[n] for n in ns]
+    def bit_overlaps(cls, nov):
+        print(f"Showing overlappings for {nov}")
+        print("="*80)
+        bdic0 = cls.sumbdic[nov]
+        bdic = bdic0
+        gcount = {}
+        for b in bdic0:
+            bcount = gcount.setdefault(f"nov-{nov}.{b}", {})
+            bcount[nov] = (len(bdic0[b][0]), len(bdic0[b][1]))
+            print("-"*20 + f" {nov}:{b} - {bdic0[b][0]},{bdic0[b][1]}")
+            nv = nov - 3
+            while True:
+                bdic = cls.sumbdic[nv]
+                cnt = gcount.setdefault(nv, {})
+                print(f"{nv}:")
+                for bit in bdic:
+                    if bit == b:
+                        c0 = len(bdic[b][0])
+                        c1 = len(bdic[b][1])
+                        m = f"  -> {nv}:{bit} - [{bdic[bit][0]},{bdic[bit][1]}]"
+                        cnt[bit] = (c0, c1)
+                        print(m)
+                        print('---')
+                print(f"-"*80)
+                nv -= 3
+                if nv == cls.last_nov:
+                    break
+        print(str(gcount))

@@ -25,6 +25,20 @@ class VKManager:
                 raise Exception(f"pop {kn} failed")
         return vk
 
+    def drop_bits(self, bits, kns, vks):
+        for bit in bits:
+            self.bdic.pop(bit)
+        for vk in vks:
+            self.vkdic.pop(vk.kname)
+        for kn in kns:
+            if kn in self.vkdic:
+                vk = self.vkdic.pop(kn)
+                # vk.drop_bits will return a clone with dropped bits
+                # the original vk will not be modified
+                self.vkdic[kn] = vk.drop_bits(bits)
+            else:
+                x = 1
+
     def printjson(self, filename):
         print_json(self.nov, self.vkdic, filename)
 

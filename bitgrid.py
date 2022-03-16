@@ -1,5 +1,6 @@
 from basics import set_bit
 from vk12mgr import VK12Manager
+from vklause import VKlause
 
 
 class BitGrid:
@@ -74,6 +75,11 @@ class BitGrid:
             if avk.hit(satdic):
                 return True
         return False
+
+    def reduce_vk(self, vk):
+        cvs, outdic = self.cvs_and_outdic(vk)
+        cvs = [v for v in cvs if v in self.chvset]
+        return VKlause(vk.kname, outdic), cvs
 
     def reduce_cvs(self, vk12m):
         """ for every vk in vk12m.vkdic, if vk is totally within grid,

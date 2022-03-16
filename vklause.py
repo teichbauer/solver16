@@ -23,15 +23,26 @@ class VKlause:
         return self.dic[self.bits[-1]]
 
     def drop_bits(self, bits):
-        for bit in bits:
-            self.drop_bit(bit)
+        d = self.dic.copy()
+        for b in bits:
+            d.pop(b)
+        if len(d) > 0:
+            return VKlause(self.kname, d)
+        else:
+            return None
+        # for bit in bits:
+        #     self.drop_bit(bit)
 
     def drop_bit(self, bit):
-        if bit in self.bits and len(self.bits) > 1:
-            self.bits.remove(bit)
-            self.nob -= 1
-            self.dic.pop(bit)
-        return self
+        # return a vk with dropped bit, but with the same vk.kname
+        # the original vk will not be altered (drop-bit)
+        if bit not in self.bits:
+            return self
+        elif len(self.bits) < 2:
+            return None
+        d = self.dic.copy()
+        d.pop(bit)
+        return VKlause(self.kname, d)
 
     def clone(self, bits2b_dropped=None):
         # bits2b_dropped: list of bits to be dropped.

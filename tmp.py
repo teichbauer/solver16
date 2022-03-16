@@ -145,3 +145,80 @@ def make_tree(self):
                     self.nxt_sn.chdic[ch] = cn
                 x = 0
         x = 1
+
+
+    @classmethod
+    def sat_pathup(cls, snode):
+        if snode.nov == cls.maxnov:
+            return snode.solve()
+        else:
+            pnode = snode.parent
+        for name, (vkm, ssat, blocks) in snode.chdic.items():
+            if type(name[-1]) == int:
+                chv = name[-1]
+            else:
+                chv = name[-1][-1]
+            for pv, pvkm in pnode.vk12mdic.items():
+                if (pnode.nov, pv) in blocks:
+                    continue
+                svkm = vkm.clone()
+                svkm.add_vkdic(pvkm.vkdic)
+                if svkm.valid:
+                    if verify_sat(svkm.vkdic, ssat):
+                        psat = pnode.bgrid.grid_sat(pv)
+                        psat.update(ssat)
+                        if len(svkm.kn1s) > 1:
+                            sdic = {}
+                            kn1s = svkm.kn1s[:]
+                            for kn in kn1s:
+                                vk1 = svkm.remove_vk1(kn)
+                                b, v = vk1.hbit_value()
+                                sdic[b] = int(not(v))
+                            psat.update(sdic)
+                        if snode.nov == cls.last_nov:
+                            pname = (name, (pnode.nov, pv))
+                        else:
+                            name_lst = list(name)
+                            name_lst.append((pnode.nov, pv))
+                            pname = tuple(name_lst)
+                        blcks = cls.find_blocks(pnode.nov, psat, pname)
+                        pnode.chdic[pname] = (svkm, psat, blcks)
+                    else:
+                        pass
+        cls.sat_pathup(pnode)
+
+    @classmethod
+    def find_blocks(cls, nov, sat, sat_name):
+        print(f"checking on {sat_name}/{str(sat)} -------")
+        nv = cls.maxnov
+        blocks = set([])
+        while nv > nov:
+            sn = cls.snodes[nv]
+            kns = verify_sat(sn.sumvk12dic, sat, True)
+            if kns == False:
+                m = f"{nv} passed {sat_name}"
+                print(m)
+            else:
+                # m = f"{nv} failed on {sat_name}"
+                for ch in sn.bgrid.chvset:
+                    if kns != True:
+                        if len(kns.intersection(sn.vk12mdic[ch].vkdic)):
+                            blocks.add((sn.nov, ch))
+            nv -= 3
+        return blocks
+
+#  snode
+# ------------------
+    def recognize_parents(self, ch):
+        psnode = Center.snodes[self.nov + 3]
+        mysat = self.bgrid.grid_sat(ch)
+        for pv, pvkm in psnode.vk12mdic.items():
+            vkm = pvkm.clone()
+            # vkm = self.vk12mdic[ch].clone()
+            vkm.add_vkdic(self.vk12mdic[ch].vkdic)
+            if vkm.valid:
+                mysat.update(psnode.bgrid.grid_sat(pv))
+                kns = vkm.bits_kns(self.bgrid.bits)
+                vks = {kn: vkm.vkdic[kn] for kn in kns}
+                if verify_sat(vks, mysat):
+                    psnode.chdic[f"{psnode.nov}.{pv}-{self.nov}.{ch}"] = vkm

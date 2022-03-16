@@ -1,10 +1,16 @@
 from datetime import datetime
 
 
-def verify_sat(vkdic, sat):
+def verify_sat(vkdic, sat, collect=False):
+    lst = set([])
     for vk in vkdic.values():
         if vk.hit(sat):
-            return False
+            if collect:
+                lst.add(vk.kname)
+            else:
+                return False
+    if collect and len(lst) > 0:
+        return lst
     return True
 
 

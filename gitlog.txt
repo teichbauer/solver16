@@ -1,3 +1,7 @@
+2022-03-15->0.298
+- vk12m: when adding a new vk resulting a vk dropping its bit(s), there will be
+  a new vk generated and added. So that the original vk remains not-altered.
+- other progress.
 2022-03-05->0.297
 - with CNode / blocks,  the performance is bad (waited for 5 min, still running)
 - bottom up from last_nov's snode: Center.sat_pathup

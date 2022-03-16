@@ -86,14 +86,14 @@ class VK12Manager:
                 # if self.vkdic[kn].dic[bit] != vk.dic[bit]:
                 if vk1.dic[bit] != vk.dic[bit]:
                     self.valid = False
-                    msg = f"vk1:{vk.kname} vs {kn}: valid: {self.valid}"
-                    self.info.append(msg)
                     if self.debug:
+                        msg = f"vk1:{vk.kname} vs {kn}: valid: {self.valid}"
+                        self.info.append(msg)
                         print(msg)
                     return False
                 else:  # self.vkdic[kn].dic[bit] == vk.dic[bit]
-                    self.info.append(f"{vk.kname} duplicats {kn}")
                     if self.debug:
+                        self.info.append(f"{vk.kname} duplicats {kn}")
                         print(self.info[-1])
                     return False
             elif kn in self.kn2s:
@@ -101,20 +101,20 @@ class VK12Manager:
                 if bit in vk2.bits:
                     if vk2.dic[bit] == vk.dic[bit]:
                         # a vk2 has the same v on this bit: remove vk2
-                        self.info.append(f"{vk.kname} removes {kn}")
                         if self.debug:
+                            self.info.append(f"{vk.kname} removes {kn}")
                             print(self.info[-1])
                         self.remove_vk2(kn)
                     else:  # vk2 has diff val on this bit
-                        self.info.append(f"{vk.kname} made {kn} vk1 ")
                         if self.debug:
+                            self.info.append(f"{vk.kname} made {kn} vk1 ")
                             print(self.info[-1])
                         # remove vk2
                         # drop bit from it(it becomes vk1)
                         # add it back as vk1
                         self.remove_vk2(kn)
-                        vk2.drop_bit(bit)
-                        self.add_vk1(vk2)
+                        vk1 = vk2.drop_bit(bit)
+                        self.add_vk1(vk1)
         # add the vk
         self.vkdic[vk.kname] = vk
         self.kn1s.append(vk.kname)
@@ -130,17 +130,17 @@ class VK12Manager:
             if b in vk.bits:
                 if self.vkdic[kn].dic[b] == vk.dic[b]:
                     # vk not added. but valid is this still
-                    self.info.append(f"{vk.kname} blocked by {kn}")
                     if self.debug:
+                        self.info.append(f"{vk.kname} blocked by {kn}")
                         print(self.info[-1])
                     return False
                 else:  # vk1 has diff value on this bit
-                    # drop this bit, this vk1 becomes vk1. Add this vk1
-                    self.info.append(f"{kn} makes {vk.kname} vk1")
+                    # drop this bit, this vk2 becomes a vk1. Add this vk1
                     if self.debug:
+                        self.info.append(f"{kn} makes {vk.kname} vk1")
                         print(self.info[-1])
-                    vk.drop_bit(b)
-                    return self.add_vk1(vk)
+                    vk1 = vk.drop_bit(b)
+                    return self.add_vk1(vk1)
         # find vk2s withsame bits
         pair_kns = []
         for kn in self.kn2s:
@@ -153,37 +153,37 @@ class VK12Manager:
                 continue  # is no more a pair with vk. In that case, jump over
             if vk.dic[bs[0]] == pvk.dic[bs[0]]:
                 if vk.dic[bs[1]] == pvk.dic[bs[1]]:
-                    self.info.append(f"{vk.kname} douplicates {kn}. not added")
                     if self.debug:
+                        self.info.append(
+                            f"{vk.kname} douplicates {kn}. not added")
                         print(self.info[-1])
                     return False  # vk not added
                 else:  # b0: same value, b1 diff value
                     msg = f"{vk.kname} + {pvk.kname}: {pvk.kname}->vk1"
-                    self.info.append(msg)
-                    self.info.append(f"{vk.kname} not added")
                     if self.debug:
+                        self.info.append(msg)
+                        self.info.append(f"{vk.kname} not added")
                         print(self.info[-1])
                         print(self.info[-2])
-                    # remove pvk
-                    self.remove_vk2(pvk.kname)
-                    pvk.drop_bit(bs[1])
-                    self.add_vk(pvk)  # validity made when add pvk as vk1
+                    # remove pvk, it becomes a vk1
+                    vk2 = self.remove_vk2(pvk.kname)
+                    vk1 = vk2.drop_bit(bs[1])
+                    self.add_vk1(vk1)  # validity updated when add vk1
                     return False  # vk not added.
             else:  # b0 has diff value
                 if vk.dic[bs[1]] == pvk.dic[bs[1]]:
                     # b1 has the same value
                     msg = f"{vk.kname} + {pvk.kname}: {pvk.kname}->vk1"
-                    self.info.append(msg)
-                    self.info.append(f"{vk.kname} not added")
                     if self.debug:
+                        self.info.append(msg)
+                        self.info.append(f"{vk.kname} not added")
                         print(self.info[-1])
                         print(self.info[-2])
                     # remove pvk
-                    self.remove_vk2(pvk.kname)
-                    # add pvk back as vk1, after dropping bs[1]
-                    pvk.drop_bit(bs[0])
-                    return self.add_vk(pvk)
-                    return False  # vk not added
+                    vk2 = self.remove_vk2(pvk.kname)
+                    # drop a bit(bs[1]), add the resulting vk1
+                    vk1 = vk2.drop_bit(bs[0])
+                    return self.add_vk(vk1)
                 else:  # non bit from vk has the same value as pvk's
                     pass
         for b in bs:
