@@ -206,6 +206,52 @@ def make_tree(self):
                             blocks.add((sn.nov, ch))
             nv -= 3
         return blocks
+# bitgrid
+# ----------
+
+    def filter_pvs(self, pvk12m):
+        " among pkv12m, see if local ch-v can be put into lnvkmdic."
+        lvkmdic = {h: VK12Manager() for h in self.chvset}
+        for vk in pvk12m.vkdic.values():
+            # inside a pv-vkm, loop thru all vks(all vk here are vk12)
+            lbs = self.bitset.intersection(vk.bits)
+            if len(lbs) == 0:
+                for ch in self.chvset:
+                    if ch in lvkmdic:
+                        lvkmdic[ch].add_vk(vk)
+                        if not lvkmdic[ch].valid:
+                            del lvkmdic[ch]
+            else:
+                cvs, outdic = self.cvs_and_outdic(vk)
+                if len(lbs) == 1:
+                    b = lbs.pop()  # vk.bits[0]
+                    if vk.nob == 1:
+                        for lv in self.chvset:  # ch-head is covered by cvs,
+                            if lv in lvkmdic:
+                                # then this lv should not be pv-vkm's path down
+                                if lv in cvs:
+                                    del lvkmdic[lv]
+                                # else: lv isn't in cvs, lv makes vk a NOT-hit,
+                                # so, this vk shouldn't be added to pv-path
+                                # although this pv-path shouldn't be remvoed
+                    else:  # vk.nob == 2, with 1 bit in self.bits
+                        for lv in self.chvset:
+                            if lv in lvkmdic:
+                                # 1 bit from vk is hit: drop the bit vk2->vk1
+                                if lv in cvs:
+                                    vkx = vk.clone([b])  # clone with dropped b
+                                    lvkmdic[lv].add_vk1(vkx)
+                                    if not lvkmdic[lv].valid:
+                                        del lvkmdic[lv]
+                                 # else: lv not in cvs of vk: this vk is
+                                 # for sure a NOT-hit:this vk will not be added
+                else:  # lbs length: 2
+                    for lv in self.chvset:
+                        if lv in lvkmdic:
+                            if lv in cvs:
+                                del lvkmdic[lv]
+        return lvkmdic
+
 
 #  snode
 # ------------------

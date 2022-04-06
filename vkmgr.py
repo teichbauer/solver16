@@ -33,9 +33,9 @@ class VKManager:
         for kn in kns:
             if kn in self.vkdic:
                 vk = self.vkdic.pop(kn)
-                # vk.drop_bits will return a clone with dropped bits
+                # vk.clone(bits) will return a clone with dropped bits
                 # the original vk will not be modified
-                self.vkdic[kn] = vk.drop_bits(bits)
+                self.vkdic[kn] = vk.clone(bits)
             else:
                 x = 1
 

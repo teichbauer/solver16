@@ -6,7 +6,8 @@ class VK12Manager:
     # debug = True
     debug = False
 
-    def __init__(self, vkdic=None, raw=False):
+    def __init__(self, svkm, vkdic=None, raw=False):
+        self.svkm = svkm
         self.valid = True
         if not raw:
             self.reset()  # set vkdic, bdic, kn1s, kn2s
@@ -27,16 +28,10 @@ class VK12Manager:
                 for k in self.bdic[b]:
                     kns.add(k)
         return kns
-        # kns = set(self.bdic[bits.pop()])
-        # while len(bits):
-        #     ks = self.bdic[bits.pop()]
-        #     for k in ks:
-        #         kns.add(k)
-        # return kns
 
     def clone(self, deep=True):
         # self.valid must be True. Construct with: no vkdic, raw=True(no reset)
-        vk12m = VK12Manager(None, True)
+        vk12m = VK12Manager(self.svkm, None, True)
         vk12m.bdic = {k: lst[:] for k, lst in self.bdic.items()}
         vk12m.kn1s = self.kn1s[:]
         vk12m.kn2s = self.kn2s[:]
@@ -73,17 +68,14 @@ class VK12Manager:
         kns = knames[:]  # kns for loop:can't use knames, for it may change.
         for kn in kns:
             if kn in self.kn1s:
-                if bit not in self.bdic:
-                    y = 1
-                if kn not in self.bdic[bit]:  # bdic may have been updated, so
-                    continue  # kn may no more be in there on this bit any more
+                # bdic may have been updated, so kn may no more be
+                # in there on this bit any more
+                if kn not in self.bdic[bit]:
+                    continue
                 vk1 = self.vkdic[kn]
                 if self.debug and bit != vk1.bits[0]:
                     print(f"bit: {bit} vs. {vk1.bits[0]}")
                     raise Exception("bit conflict")
-                if vk1.bits[0] != bit:
-                    debug = 1
-                # if self.vkdic[kn].dic[bit] != vk.dic[bit]:
                 if vk1.dic[bit] != vk.dic[bit]:
                     self.valid = False
                     if self.debug:
@@ -109,16 +101,13 @@ class VK12Manager:
                         if self.debug:
                             self.info.append(f"{vk.kname} made {kn} vk1 ")
                             print(self.info[-1])
-                        # remove vk2
-                        # drop bit from it(it becomes vk1)
-                        # add it back as vk1
+                        # drop a bit:it becomes vk1, add it back as vk1
                         self.remove_vk2(kn)
-                        vk1 = vk2.drop_bit(bit)
+                        vk1 = vk2.clone([bit])
                         self.add_vk1(vk1)
-        # add the vk
         self.vkdic[vk.kname] = vk
         self.kn1s.append(vk.kname)
-        self.bdic.setdefault(bit, []).append(vk.kname)
+        self.bdic.setdefault(bit, []).insert(0, vk.kname)
         return True
 
     def add_vk2(self, vk):
@@ -133,13 +122,13 @@ class VK12Manager:
                     if self.debug:
                         self.info.append(f"{vk.kname} blocked by {kn}")
                         print(self.info[-1])
-                    return False
+                    return (self.valid, False, ("shadowed-by", kn))
                 else:  # vk1 has diff value on this bit
                     # drop this bit, this vk2 becomes a vk1. Add this vk1
                     if self.debug:
                         self.info.append(f"{kn} makes {vk.kname} vk1")
                         print(self.info[-1])
-                    vk1 = vk.drop_bit(b)
+                    vk1 = vk.clone([b])
                     return self.add_vk1(vk1)
         # find vk2s withsame bits
         pair_kns = []
@@ -167,7 +156,7 @@ class VK12Manager:
                         print(self.info[-2])
                     # remove pvk, it becomes a vk1
                     vk2 = self.remove_vk2(pvk.kname)
-                    vk1 = vk2.drop_bit(bs[1])
+                    vk1 = vk2.clone([bs[1]])
                     self.add_vk1(vk1)  # validity updated when add vk1
                     return False  # vk not added.
             else:  # b0 has diff value
@@ -182,7 +171,7 @@ class VK12Manager:
                     # remove pvk
                     vk2 = self.remove_vk2(pvk.kname)
                     # drop a bit(bs[1]), add the resulting vk1
-                    vk1 = vk2.drop_bit(bs[0])
+                    vk1 = vk2.clone([bs[0]])
                     return self.add_vk(vk1)
                 else:  # non bit from vk has the same value as pvk's
                     pass

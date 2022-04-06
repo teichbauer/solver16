@@ -1,4 +1,5 @@
 from basics import verify_sat
+# from sat2 import Sat2
 
 
 class Center:
@@ -8,8 +9,9 @@ class Center:
     sats = []
     limit = 10
     snodes = {}
-    sumvk12m = {}  # snode.nov: snode.sumvk12dic
+    vk12kndic = {}  # {nov: [kns]}
     sumbdic = {}
+    sumvk12dic = {}
     orig_vkm = None
 
     @classmethod
@@ -22,6 +24,17 @@ class Center:
         nov = cls.maxnov
         x = 1
         # sn = cls.snodes[nov]
+
+    @classmethod
+    def solve(cls):
+        # sat2 = Sat2(None, None, cls.sumvk12dic)
+        # sat2.split2()
+        # if sat2.children[1]:
+        #     # sat2.children[1].verify(cls.vk12kndic, cls.maxnov, cls.last_nov)
+        #     sat2.children[1].verify(cls.maxnov, cls.last_nov)
+        # if sat2.children[0]:
+        #     sat2.children[0].verify(cls.maxnov, cls.last_nov)
+        x = 1
 
     @classmethod
     def set_satbits(cls):
@@ -79,3 +92,12 @@ class Center:
                 if nv == cls.last_nov:
                     break
         print(str(gcount))
+
+    @classmethod
+    def show_sumvk12m(cls, nov):
+        dic = cls.sumvk12m[nov]
+        ks = sorted(dic.keys())
+        print(f"{nov} has {len(ks)} vks:")
+        for k in ks:
+            m = f"{k}:{str(dic[k][0].dic)}, {str(dic[k][1])}"
+            print(m)

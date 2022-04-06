@@ -8,13 +8,15 @@ class VKlause:
         the origin field refs to that (3-bits vk)
         '''
 
-    def __init__(self, kname, dic):
+    def __init__(self, kname, dic, nov=None, cvs=None):
         self.kname = kname    # this vk can be a partial one: len(bits) < 3)
         self.dic = dic  # { 7:1, 3: 0, 0: 1}, or {3:0, 1:1} or {3:1}
         # all bits, in descending order
         self.bits = sorted(dic.keys(), reverse=True)  # [7,3,0]
         # void bits of the nov-bits
         self.nob = len(self.bits)             # 1, 2 or 3
+        self.nov = nov
+        self.cvs = cvs
 
     def hbit_value(self):
         return self.bits[0], self.dic[self.bits[0]]
@@ -22,27 +24,12 @@ class VKlause:
     def lbit_value(self):
         return self.dic[self.bits[-1]]
 
-    def drop_bits(self, bits):
-        d = self.dic.copy()
-        for b in bits:
-            d.pop(b)
-        if len(d) > 0:
-            return VKlause(self.kname, d)
-        else:
-            return None
-        # for bit in bits:
-        #     self.drop_bit(bit)
-
-    def drop_bit(self, bit):
-        # return a vk with dropped bit, but with the same vk.kname
-        # the original vk will not be altered (drop-bit)
-        if bit not in self.bits:
-            return self
-        elif len(self.bits) < 2:
-            return None
-        d = self.dic.copy()
-        d.pop(bit)
-        return VKlause(self.kname, d)
+    def cut_bit(self, bit):
+        if self.nob < 2 or not (bit in self.bits):
+            raise Exception(f"vk1 cannot be cut or {bit} not in {self.kname} ")
+        self.dic.pop(bit)
+        self.bits.remove(bit)
+        self.nob -= 1
 
     def clone(self, bits2b_dropped=None):
         # bits2b_dropped: list of bits to be dropped.
@@ -53,7 +40,7 @@ class VKlause:
                 # drop off this bit from dic.
                 dic.pop(b, None)
         if len(dic) > 0:
-            return VKlause(self.kname, dic)
+            return VKlause(self.kname, dic, self.nov, self.cvs)
         else:
             return None
 
