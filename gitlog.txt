@@ -1,3 +1,5 @@
+2022-04-08->0.300
+- progress. TBD: VK12Manager.add_vk2/pair case
 2022-04-06->0.299
 - progress
 2022-03-15->0.298

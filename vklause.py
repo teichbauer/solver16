@@ -39,10 +39,11 @@ class VKlause:
             for b in bits2b_dropped:
                 # drop off this bit from dic.
                 dic.pop(b, None)
+            return VKlause(self.kname.replace('C', 'M'),
+                           dic, self.nov, self.cvs)
         if len(dic) > 0:
             return VKlause(self.kname, dic, self.nov, self.cvs)
-        else:
-            return None
+        return None
 
     def cmprssd_value(self, ref_bits=None):
         ''' compress to 3 bits: [2,1,0] keep the order. get bin-value.
