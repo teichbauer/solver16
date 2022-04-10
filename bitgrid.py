@@ -35,69 +35,29 @@ class BitGrid:
         return False
 
     def reduce_vk(self, vk):
-        cvs, outdic = self.cvs_and_outdic(vk)
-        cvs = [v for v in cvs if v in self.chvset]
+        # vk is vk3 with 1 or 2 bit(s) in self.bits,
+        # but not 3 - vk is not a avk (totally contained in self.bits)
+        scvs, outdic = self.cvs_and_outdic(vk)
+        cvs = self.chvset.intersection(scvs)
         return VKlause(vk.kname, outdic, self.nov, cvs)
-
-    def reduce_cvs(self, vk12m):
-        """ for every vk in vk12m.vkdic, if vk is totally within grid,
-            """
-        cvs_set = set(self.chvset)
-        kns = vk12m.kn1s + vk12m.kn2s
-        for kn in kns:
-            vk = vk12m.vkdic[kn]
-            if self.bitset.issuperset(vk.bits):
-                cvs, dummy = self.cvs_and_outdic(vk)
-                for cv in cvs:
-                    if cv in cvs_set:
-                        cvs_set.remove(cv)
-                if len(cvs_set) == 0:
-                    break
-        return cvs_set
 
     def vary_1bit(self, val, bits, cvs):
         if len(bits) == 0:
-            cvs.append(val)
+            cvs.add(val)
         else:
             bit = bits.pop()
             for v in (0, 1):
                 nval = set_bit(val, bit, v)
                 if len(bits) == 0:
-                    cvs.append(nval)
+                    cvs.add(nval)
                 else:
                     self.vary_1bit(nval, bits[:], cvs)
         return cvs
 
-    def get_vk12bits(self, snode):
-        self.vk12bitdic = {}
-        self.vk12sumbits = set([])
-        for vk in snode.sumvk12dic.values():
-            self.vk12sumbits.update(vk.bits)
-            for b in vk.bits:
-                self.vk12bitdic.setdefault(b, set([])).add(vk.kname)
-        self.vk12dic_bits = {k: set([]) for k in snode.vk12mdic}
-        for k in snode.vk12mdic:
-            for vk in snode.vk12mdic[k].vkdic.values():
-                self.vk12dic_bits[k].update(vk.bits)
-        x = 1
-
-    def find_blocks(self, vks):
-        # list of kns that should be ignored for a chv
-        # if this chv is blocked, this entry is removed from knsdic
-        knsdic = {ch: [] for ch in self.chvset}
-        for vk in vks:
-            cvs, out = self.cvs_and_outdic(vk)
-            for chv in knsdic:
-                if chv in cvs:
-                    knsdic[chv].append(vk.kname)
-                else:
-                    pass
-
-    def cvs_and_outdic(self, vk):
-        g = [2, 1, 0]
-        # for a vk touched by grid-bits (1 or 2 bits)
+    def cvs_and_outdic(self, vk):  # vk is vk3 with 1 or 2 bit(s) in self.bits
+        g = [2, 1, 0]  #
         # cvs may contain 2 or 4 values in it
-        cvs = []
+        cvs = set([])
         # vk's dic values within self.grid-bits, forming a value in (0..7)
         # example: grids: (16,6,1), vk.dic:{29:0, 16:1, 1:0} has
         # {16:1,1:0} iwithin grid-bits, forming a value of 4/1*0 where
@@ -112,20 +72,6 @@ class BitGrid:
                 v = set_bit(v, ind, vk.dic[b])
             else:
                 out_dic[b] = vk.dic[b]
-        odic_ln = len(out_dic)
-        if odic_ln == 0:  # vk is covered by grid-3 bits totally
-            # there is no rvk (None)
-            if vk.nob == 3:   # cvs is a single value, not a list
-                cvs = vk.cmprssd_value()
-            elif vk.nob < 3:  # cvs is a list of values
-                cvs = self.vary_1bit(v, g, cvs)  # TB verified
-            return cvs, out_dic
-
-        if odic_ln == 3:
-            raise Exception("vk3!")
-
-        if odic_ln != vk.nob:
-            # get values of all possible settings of untouched bits in g
-            cvs = self.vary_1bit(v, g, cvs)
-            cvs.sort()
+        # get values of all possible settings of untouched bits in g
+        cvs = self.vary_1bit(v, g, cvs)
         return cvs, out_dic

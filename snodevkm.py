@@ -22,6 +22,29 @@ class SnodeVkm:
             if v in self.chvkdic and vk not in self.chvkdic[v]:
                 self.chvkdic[v].append(vk)
 
+    def add_duplicate(self, vk, old_vk):
+        for v in vk.cvs:
+            if v not in old_vk.cvs:
+                self.chvkdic[v].append(vk)
+
+    def add_dupbits_compliment(self, vk, old_vk, diff_v_bit):
+        # vk and old_vk are both vk2 (nob==2)
+        # vk and old_vk have the same bits, and
+        # vk.dic[same_bit] == old_vk.dic[same_bit]
+        # vk.dic[diff_v_bit] != old_vk.dic[diff_v_bit]
+        vk1 = vk.clone([diff_v_bit])    # vk1.kname: "M***"
+        self.vk12dic[vk1.kname] = vk1   # register vk1
+        vs = vk.cvs.intersection(old_vk.cvs)
+        vs1 = vk.cvs - old_vk.cvs  # left-over in vk after removing old-vk.cvs
+        for v in vk.cvs:
+            if v in vs:
+                if old_vk in self.chvkdic[v]:
+                    self.chvkdic.remove(old_vk)
+                self.chvkdic[v].append(vk1)
+            elif v in vs1:
+                if vk not in self.chvkdic[v]:
+                    self.chvkdic[v].append(vk)
+
     def add_shadowed(self,
                      vk,             # shadowed vk, to be added
                      shadowing_vk):  # existing vklause(vk1) shadowing vk

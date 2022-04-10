@@ -16,7 +16,7 @@ class VKlause:
         # void bits of the nov-bits
         self.nob = len(self.bits)             # 1, 2 or 3
         self.nov = nov
-        self.cvs = cvs
+        self.cvs = cvs  # a set of values (as chvkdic[v]) this vk is in
 
     def hbit_value(self):
         return self.bits[0], self.dic[self.bits[0]]

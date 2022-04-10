@@ -56,77 +56,31 @@ class VK12Manager:
     # end of def add_vk1(self, vk) ----------------------------------
 
     def add_vk2(self, vk):
-        if self.debug:
-            print(f"adding vk2: {vk.kname}")
-        # if an existing vk1 covers vk?
-        for kn in self.kn1s:
+        for kn in self.kn1s:  # any existing vk1 covers vk?
             b = self.svkm.vk12dic[kn].bits[0]
-            if b in vk.bits:
-                if self.svkm.vk12dic[kn].dic[b] == vk.dic[b]:
-                    # vk not added. but valid is this still
-                    if self.debug:
-                        self.info.append(f"{vk.kname} blocked by {kn}")
-                        print(self.info[-1])
-                    self.svkm.add_shadowed(vk, self.svkm.vk12dic[kn])
-                    # return (self.valid, False, ("shadowed-by", kn))
-                else:  # vk1 has diff value on this bit
-                    # drop this bit, this vk2 becomes a vk1. Add this vk1
-                    if self.debug:
-                        self.info.append(f"{kn} makes {vk.kname} vk1")
-                        print(self.info[-1])
-                    self.svkm.add_shadowed(vk, self.svkm.vk12dic[kn])
-                    return True
-            else:
-                pass
+            self.svkm.add_shadowed(vk, self.svkm.vk12dic[kn])
+            return True
         # find vk2s withsame bits
         pair_kns = []
         for kn in self.kn2s:
             if self.svkm.vk12dic[kn].bits == vk.bits:
                 pair_kns.append(kn)
         bs = vk.bits
-        for pk in pair_kns:
-            pvk = self.svkm.vk12dic[pk]
-            if pvk.bits != vk.bits:  # pvk may have been modified, and
-                continue  # is no more a pair with vk. In that case, jump over
-            if vk.dic[bs[0]] == pvk.dic[bs[0]]:
-                if vk.dic[bs[1]] == pvk.dic[bs[1]]:
-                    if self.debug:
-                        self.info.append(
-                            f"{vk.kname} douplicates {kn}. not added")
-                        print(self.info[-1])
-                    return False  # vk not added
-                else:  # b0: same value, b1 diff value
-                    msg = f"{vk.kname} + {pvk.kname}: {pvk.kname}->vk1"
-                    if self.debug:
-                        self.info.append(msg)
-                        self.info.append(f"{vk.kname} not added")
-                        print(self.info[-1])
-                        print(self.info[-2])
-                    # remove pvk, it becomes a vk1
-                    vk2 = self.remove_vk2(pvk.kname)
-                    vk1 = vk2.clone([bs[1]])
-                    self.add_vk1(vk1)  # validity updated when add vk1
-                    return False  # vk not added.
-            else:  # b0 has diff value
-                if vk.dic[bs[1]] == pvk.dic[bs[1]]:
-                    # b1 has the same value
-                    msg = f"{vk.kname} + {pvk.kname}: {pvk.kname}->vk1"
-                    if self.debug:
-                        self.info.append(msg)
-                        self.info.append(f"{vk.kname} not added")
-                        print(self.info[-1])
-                        print(self.info[-2])
-                    # remove pvk
-                    vk2 = self.remove_vk2(pvk.kname)
-                    # drop a bit(bs[1]), add the resulting vk1
-                    vk1 = vk2.clone([bs[0]])
-                    return self.add_vk(vk1)
-                else:  # non bit from vk has the same value as pvk's
-                    pass
-        for b in bs:
-            self.bdic.setdefault(b, []).append(vk.kname)
-        self.kn2s.append(vk.kname)
-        self.svkm.add_vk(vk)
+        if len(pair_kns) == 0:  # there is no pair
+            for b in bs:
+                self.bdic.setdefault(b, []).append(vk.kname)
+            self.kn2s.append(vk.kname)
+            self.svkm.add_vk(vk)
+        else:
+            for pk in pair_kns:
+                pvk = self.svkm.vk12dic[pk]
+                if vk.dic[bs[0]] == pvk.dic[bs[0]]:
+                    if vk.dic[bs[1]] == pvk.dic[bs[1]]:
+                        self.svkm.add_duplicate(vk, pvk)
+                    else:  # b0: same value, b1 diff value
+                        self.svkm.add_dupbits_compliment(vk, pvk, bs[1])
+                elif vk.dic[bs[1]] == pvk.dic[bs[1]]:
+                    self.svkm.add_dupbits_compliment(vk, pvk, bs[0])
         return True
     # end of def add_vk2(self, vk): --------------------------
 
