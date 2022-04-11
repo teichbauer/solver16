@@ -3,8 +3,6 @@ from basics import get_bit, oppo_binary, display_vkdic
 
 
 class VK12Manager:
-    # debug = True
-    debug = False
 
     def __init__(self, svkm, vkdic=None, raw=False):
         self.svkm = svkm
@@ -33,9 +31,6 @@ class VK12Manager:
                     self.valid = False
                     return False
                 else:  # self.svkm.vk12dic[kn].dic[bit] == vk.dic[bit]
-                    # if self.debug:
-                    #     self.info.append(f"{vk.kname} duplicats {kn}")
-                    #     print(self.info[-1])
                     self.svkm.add_duplicated_vk1(vk, vk1)
                     return False
             elif kn in self.kn2s:
@@ -91,13 +86,6 @@ class VK12Manager:
                 for k in self.bdic[b]:
                     kns.add(k)
         return kns
-
-    def clone(self, deep=True):
-        vk12m = VK12Manager(self.svkm, None, True)
-        vk12m.bdic = {k: lst[:] for k, lst in self.bdic.items()}
-        vk12m.kn1s = self.kn1s[:]
-        vk12m.kn2s = self.kn2s[:]
-        return vk12m
 
     def vk1s(self):
         return [self.svkm.vk12dic[kn] for kn in self.kn1s]

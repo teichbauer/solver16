@@ -49,7 +49,7 @@ class SatNode:
                 bdic.setdefault(b, [[], []])[v].append(kn)
             vk12kns.append(kn)
             vk12dic[kn] = vk12
-        self.sat2 = Sat2(self, None, vk12dic)
+        self.sat2 = Sat2(self, None, None, vk12dic)
         x = 1
     # ---- def split_vkm(self) --------
 
@@ -61,12 +61,6 @@ class SatNode:
             return self.next.spawn()
         else:
             Center.last_nov = self.nov
-            # Center.novs = sorted([n for n in Center.snodes], reverse=True)
-            # Center.set_satbits()
-            # for ch in self.bgrid.chvset:
-            #     ch_sat = self.bgrid.grid_sat(ch)
-            #     self.chdic[(self.nov, ch)] = (
-            #         self.vk12mdic[ch], ch_sat, set([]))
             root_s2 = Center.snodes[Center.maxnov].sat2
             root_s2.split2()
             root_s2.children[1].verify(Center.maxnov, self.nov)

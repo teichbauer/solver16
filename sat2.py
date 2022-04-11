@@ -3,20 +3,23 @@ from snodevkm import SnodeVkm
 
 
 class Sat2:
-    def __init__(self, parent, v, vk12dic):
+    def __init__(self, snode, parent, v, vk12dic):
+        self.snode = snode
         self.parent = parent
-        if parent.__class__.__name__ == 'Sat2':
+        if parent:
             self.name = f"{parent.maxb}.{v}"
         else:
             self.name = 'root'
         self.alive = True
         self.vk12dic = vk12dic
+        self.chvkdic = {v: [] for v in snode.bgrid.chvset}
         self.bdict = {}
-        for kn, vk in vk12dic.items():
-            for b in vk.bits:
-                self.bdict.setdefault(b, []).append(kn)
-        maxcnt = 0
+        self.svkm = SnodeVkm(self, snode.nov)
+        self.find_maxb()
+
+    def find_maxb(self):
         self.maxb = -1
+        maxcnt = 0
         for b in self.bdict:
             if len(self.bdict[b]) > maxcnt:
                 maxcnt = len(self.bdict[b])
@@ -24,9 +27,7 @@ class Sat2:
 
     def verify(self, nov, stop_nov):
         while nov > stop_nov:
-            sn = SnodeVkm(self.vk12dic, nov)
-            sn.verify()
-            # nov -= 3
+            self.svkm.sort_chvkdic()
             break
         x = 2
 
@@ -59,8 +60,8 @@ class Sat2:
                 else:  # vk12dic[kn].bits[0] == 1
                     self.children[1] = None  # children[1] is impossible
         if self.children[0]:
-            self.children[0] = Sat2(self, 0, self.children[0])
+            self.children[0] = Sat2(self.snode, self, 0, self.children[0])
         if self.children[1]:
-            self.children[1] = Sat2(self, 1, self.children[1])
+            self.children[1] = Sat2(self.snode, self, 1, self.children[1])
         if self.children[0] == None and self.children[0] == None:
             self.alive = False
