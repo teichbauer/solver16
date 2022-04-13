@@ -12,7 +12,7 @@ class Sat2:
             self.name = 'root'
         self.alive = True
         self.vk12dic = vk12dic
-        self.chvkdic = {v: [] for v in snode.bgrid.chvset}
+        self.chvkdic = {v: set([]) for v in snode.bgrid.chvset}
         self.bdict = {}
         self.svkm = SnodeVkm(self, snode.nov)
         self.find_maxb()

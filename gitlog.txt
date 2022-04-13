@@ -1,3 +1,7 @@
+2022-04-12->0.303
+- fixing snodevkm
+- add snodevkm.bitdic/.kn1s/.kn2s Now for debugging, may be removed later.
+-- sat2.chvkdic{v, <set>}
 2022-04-11->0.302
 - mrtge vk12mgr into snodevkm. sat2 and snodevkm share bdic, chvkdic
 2022-04-09->0.301
