@@ -40,23 +40,23 @@ class SnodeVkm:
             if kn in self.kn1s:
                 vk1 = self.vk12dic[kn]
                 if vk1.dic[bit] != vk.dic[bit]:
-                    self.added = self.added or \
-                        self.add_kicker_vk1(vk, vk1)
+                    added = self.add_kicker_vk1(vk, vk1)
+                    self.added = self.added or added
                 else:  # self.vk12dic[kn].dic[bit] == vk.dic[bit]
-                    self.added = self.added or \
-                        self.add_duplicated_vk1(vk, vk1)
+                    added = self.add_duplicated_vk1(vk, vk1)
+                    self.added = self.added or added
             elif kn in self.kn2s:
                 vk2 = self.vk12dic[kn]
                 if bit in vk2.bits:
                     if vk2.dic[bit] == vk.dic[bit]:
                         # a vk2 has the same v on this bit:
                         # remove vk2 from vs vk is on
-                        self.added = self.added or \
-                            self.add_shadowing(vk, self.vk12dic[kn])
+                        added = self.add_shadowing(vk, self.vk12dic[kn])
+                        self.added = self.added or added
                     else:  # vk2 has diff val on this bit
                         # drop a bit:it becomes vk1, add it back as vk1
-                        self.added = self.added or \
-                            self.add_cutting(vk, self.vk12dic[kn])
+                        added = self.add_cutting(vk, self.vk12dic[kn])
+                        self.added = self.added or added
                 else:
                     self.added = self.add2chvkdic(vk)
         if not self.added:
