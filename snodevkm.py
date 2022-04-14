@@ -23,38 +23,43 @@ class SnodeVkm:
 
     def sort_chvkdic(self):
         self.bitdic = {}
-        for kn, vk in self.vk12dic.items():
+        kns = list(self.vk12dic.keys())
+        for kn in kns:
+            vk = self.vk12dic[kn]
             if vk.nob == 1:
                 self.add_vk1(vk)
             else:
                 self.add_vk2(vk)
+        x = 1
 
     def add_vk1(self, vk):
-        added = False
+        self.added = False
         bit = vk.bits[0]
-        kns = self.bitdic[bit]
+        kns = self.bitdic.get(bit, []).copy()
         for kn in kns:
             if kn in self.kn1s:
                 vk1 = self.vk12dic[kn]
                 if vk1.dic[bit] != vk.dic[bit]:
-                    added = self.add_kicker_vk1(vk, vk1)
+                    self.added = self.added or \
+                        self.add_kicker_vk1(vk, vk1)
                 else:  # self.vk12dic[kn].dic[bit] == vk.dic[bit]
-                    added = self.add_duplicated_vk1(vk, vk1)
-                return
+                    self.added = self.added or \
+                        self.add_duplicated_vk1(vk, vk1)
             elif kn in self.kn2s:
                 vk2 = self.vk12dic[kn]
                 if bit in vk2.bits:
                     if vk2.dic[bit] == vk.dic[bit]:
                         # a vk2 has the same v on this bit:
                         # remove vk2 from vs vk is on
-                        added = self.add_shadowing(vk, self.vk12dic[kn])
+                        self.added = self.added or \
+                            self.add_shadowing(vk, self.vk12dic[kn])
                     else:  # vk2 has diff val on this bit
                         # drop a bit:it becomes vk1, add it back as vk1
-                        added = self.add_cutting(vk, self.vk12dic[kn])
+                        self.added = self.added or \
+                            self.add_cutting(vk, self.vk12dic[kn])
                 else:
-                    added = self.add2chvkdic(vk)
-                return
-        if not added:
+                    self.added = self.add2chvkdic(vk)
+        if not self.added:
             self.add2chvkdic(vk)
     # ---- end of def add_vk1(self, vk) -----------------------------
 
@@ -66,6 +71,8 @@ class SnodeVkm:
         # find vk2s with same bits
         pair_kns = []
         for kn in self.kn2s:
+            if kn == vk.kname:
+                continue
             if self.vk12dic[kn].bits == vk.bits:
                 pair_kns.append(kn)
         bs = vk.bits
@@ -91,6 +98,8 @@ class SnodeVkm:
             self.kn2s.add(vk.kname)
         for b in vk.bits:
             self.bitdic.setdefault(b, set([])).add(vk.kname)
+            if vk.kname not in self._bdic[b]:
+                self._bdic[b].add(vk.kname)
 
     def add2chvkdic(self, vk):
         self.add2bitdic(vk)
@@ -129,7 +138,7 @@ class SnodeVkm:
         self.add2bitdic(vk)
         # new vk1 on svbit, vk1.kname: "M***"
         vk1 = vk.clone([diff_v_bit])
-        vk1.cvs.clear()
+        vk1.cvs = set([])
         self.register(vk1, True)
 
         avs = vk.cvs.union(old_vk.cvs)
@@ -163,7 +172,7 @@ class SnodeVkm:
                         self.chvkdic[v].add(vk)
         else:  # vk[vk1_bit] != shadowing_vk[vk1_bit]: vk->vk1 for shadowed vs
             cut_vk = vk.clone([vk1_bit])
-            cut_vk.cvs.clear()
+            cut_vk.cvs = set([])
             # register cut_vk
             self.register(cut_vk, True)
 
@@ -183,7 +192,7 @@ class SnodeVkm:
                       old_vk):    # shadowed old-vk (nob==2)
         self.add2bitdic(vk)
         for v in vk.cvs:
-            if old_vk in self.chvdic[v]:
+            if old_vk in self.chvkdic[v]:
                 self.chvkdic[v].discard(old_vk)  # remove old_vk from this v
             self.chvkdic[v].add(vk)              # add vk to v
         return True  # vk has been added to chvkdic
@@ -200,18 +209,18 @@ class SnodeVkm:
         self.register(vk1, True)
 
         # add vk1, set its cvs
-        vk1.cvs.clear()
+        vk1.cvs = set([])
         for v in vk.cvs:
-            self.chvkdic[v].append(vk)
+            self.chvkdic[v].add(vk)
             if old_vk2 in self.chvkdic[v]:
                 self.chvkdic[v].discard(old_vk2)
-                vk1.cvs.append(v)
+                vk1.cvs.add(v)
                 self.chvkdic[v].add(vk1)
         return True  # vk has been added to chvkdic
 
     def add_kicker_vk1(self,
                        vk,         # vk1 being added
-                       hit_vk):    # old vk1 with conflict
+                       hit_vk):    # old vk1 conflict: old_vk[bit] != vk[bit]
         self.add2bitdic(vk)
         for v in vk.cvs:
             if v in hit_vk.cvs:
@@ -221,11 +230,25 @@ class SnodeVkm:
         return True  # vk has been added to chvkdic
 
     def add_duplicated_vk1(self,
-                           vk,
-                           old_vk):
+                           vk,      # vk(nob==1) and old_vk(nob==1)
+                           old_vk):  # vk[bit] == old_vk[bit]
         self.add2bitdic(vk)
         for v in vk.cvs:
             if v not in old_vk.cvs:
                 self.chvkdic[v].add(vk)
                 if vk.kname not in self._bdic[vk.bits[0]]:
                     self._bdic[vk.bits[0]].add(vk.kname)
+
+    def add_duplicated_vk1(self,     # vk(nob==1) and old_vk(nob==1)
+                           vk,       # vk.bits[0] == old_vk.bits[0]
+                           old_vk):  # vk[bit] == old_vk[bit]
+        if vk.cvs == old_vk.cvs or old_vk.cvs.issuperset(vk.cvs):
+            return False
+        if vk.cvs.issuperset(old_vk.cvs):
+            self.bitdic[vk.bits[0]].discard(old_vk.kname)
+            self._bdic[vk.bits[0]].discard(old_vk.kname)
+        self.add2bitdic(vk)
+        for v in vk.cvs:
+            self.chvkdic[v].discard(old_vk)
+            self.chvkdic[v].add(vk)
+        return True
