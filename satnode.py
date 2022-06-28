@@ -1,10 +1,9 @@
-# from typing_extensions import ParamSpecKwargs
 from vklause import VKlause
 from vk12mgr import VK12Manager
 from bitgrid import BitGrid
 from center import Center
 from sat2 import Sat2
-# from snodevkm import SnodeVkm
+from tail import Tail
 from basics import display_vkdic, ordered_dic_string, verify_sat
 
 
@@ -20,16 +19,13 @@ class SatNode:
         else:
             self.nov = parent.nov - 3
         self.sh = sh
-        self.vkm = vkm
+        self.vkm = vkm  # all 3vks in here
         Center.snodes[self.nov] = self
         self.next = None
         self.touched = choice['touched']
         self.next_sh = self.sh.reduce(choice["bits"])
         self.bgrid = BitGrid(choice, self.nov)
         self.split_vkm()
-
-    def chname(self, v):
-        return f"{self.nov}.{v}"
 
     def split_vkm(self):
         for b in self.bgrid.bits:
@@ -40,34 +36,39 @@ class SatNode:
 
         bdic = Center.sumbdic.setdefault(self.nov, {})
         vk12dic = {}
+        knss = {1:[], 2:[]}   # [[k1ns-list], [kn2s-list]]
 
         for kn in self.touched:
-            vk = self.vkm.pop_vk(kn)
-            vk12 = self.bgrid.reduce_vk(vk)
+            vk = self.vkm.pop_vk(kn)        # pop out 3vk
+            vk12 = self.bgrid.reduce_vk(vk) # make it vk12
             Center.sumvk12dic[kn] = vk12
             for b, v in vk12.dic.items():
-                bdic.setdefault(b, [[], []])[v].append(kn)
+                bdic.setdefault(b, set([])).add(kn)
             vk12kns.append(kn)
             vk12dic[kn] = vk12
-        self.sat2 = Sat2(self, None, None, vk12dic)
+            knss[vk12.nob].append(vk12.kname)
+        self.tail = Tail(self, vk12dic, bdic, knss)
+        # self.sat2 = Sat2(self,      # root sat2's parent is this snode
+        #                  None,      # sats: None, otherwise [..]
+        #                  vk12dic)
         x = 1
     # ---- def split_vkm(self) --------
 
     def spawn(self):
         if len(self.vkm.vkdic) > 0:
+            # as long as there exist vk3 in self.vkm.vkdic: 
+            # go next (nov -= 3)
             self.next = SatNode(self,  # parent
                                 self.next_sh.clone(),
                                 self.vkm)
             return self.next.spawn()
         else:
+            # when there is no more vk3
             Center.last_nov = self.nov
             root_s2 = Center.snodes[Center.maxnov].sat2
             root_s2.split2()
             root_s2.children[1].verify(Center.maxnov, self.nov)
             x = 1
-            # root_s2.children[0].verify
-
-            # Center.bit_overlaps(60)
 
     def make_vk12mdic(self, sumvkdic):
         self.vk12mdic = {v: VK12Manager() for v in self.bgrid.chvset}

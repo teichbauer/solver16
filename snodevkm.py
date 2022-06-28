@@ -2,8 +2,8 @@ from center import Center
 
 
 class SnodeVkm:
-    def __init__(self, sat2, nov):
-        self.nov = nov
+    def __init__(self, sat2):
+        self.nov = sat2.snode.nov
         self.sat2 = sat2
         self.chvkdic = sat2.chvkdic
         self.kn1s = set([])

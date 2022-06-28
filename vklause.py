@@ -31,18 +31,25 @@ class VKlause:
         self.bits.remove(bit)
         self.nob -= 1
 
-    def clone(self, bits2b_dropped=None):
+    def clone(self, 
+            bits2b_dropped=None,    # bits to be dropped, if this is given:
+            delta_cvs=None):        # optional: cvs {'-':[], '+':[]}
         # bits2b_dropped: list of bits to be dropped.
         # They must be the top-bits
         dic = self.dic.copy()
+        cvs = self.cvs.copy()
+        if delta_cvs:
+            cvs = cvs - set(delta_cvs['-'])
+            cvs = cvs.union(delta_cvs['+'])
+            
         if bits2b_dropped and len(bits2b_dropped) > 0:
             for b in bits2b_dropped:
                 # drop off this bit from dic.
                 dic.pop(b, None)
             return VKlause(self.kname.replace('C', 'M'),
-                           dic, self.nov, self.cvs)
+                           dic, self.nov, cvs)
         if len(dic) > 0:
-            return VKlause(self.kname, dic, self.nov, self.cvs)
+            return VKlause(self.kname, dic, self.nov, cvs)
         return None
 
     def cmprssd_value(self, ref_bits=None):
@@ -150,3 +157,12 @@ class VKlause:
             if self.dic[b] != vk.dic[b]:
                 return False
         return True
+
+    def pop_cvs(self, cvs):
+        for cv in cvs:
+            if cv in self.cvs:
+                self.cvs.remove(cv)
+            
+    def add_cvs(self, cvs):
+        for cv in cvs:
+            self.cvs.add(cv)

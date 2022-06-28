@@ -23,7 +23,8 @@ class BitGrid:
         self.nov = nov
         self.covers = tuple(vk.cmprssd_value() for vk in self.avks)
         chlst = [v for v in range(8) if v not in self.covers]
-        self.chvset = frozenset(chlst)
+        # self.chvset = frozenset(chlst)
+        self.chvset = set(chlst)
 
     def grid_sat(self, val):
         return {self.bits[b]: v for b, v in self.BDICS[val].items()}
@@ -41,7 +42,9 @@ class BitGrid:
         cvs = self.chvset.intersection(scvs)
         return VKlause(vk.kname, outdic, self.nov, cvs)
 
-    def vary_1bit(self, val, bits, cvs):
+    def vary_bits(self, val, bits, cvs):
+        # set val[b] = 0 and 1 for each b in bits, 
+        # collecting each val after each setting into cvs
         if len(bits) == 0:
             cvs.add(val)
         else:
@@ -51,7 +54,7 @@ class BitGrid:
                 if len(bits) == 0:
                     cvs.add(nval)
                 else:
-                    self.vary_1bit(nval, bits[:], cvs)
+                    self.vary_bits(nval, bits[:], cvs)
         return cvs
 
     def cvs_and_outdic(self, vk):  # vk is vk3 with 1 or 2 bit(s) in self.bits
@@ -62,7 +65,7 @@ class BitGrid:
         # example: grids: (16,6,1), vk.dic:{29:0, 16:1, 1:0} has
         # {16:1,1:0} iwithin grid-bits, forming a value of 4/1*0 where
         # * is the variable value taking 0/1 - that will be set by
-        # self.vary_1bit call, but for to begin, set v to be 4/100
+        # self.vary_bits call, but for to begin, set v to be 4/100
         v = 0
         out_dic = {}  # dic with 1 or 2 k/v pairs, for making vk12
         for b in vk.dic:
@@ -73,5 +76,5 @@ class BitGrid:
             else:
                 out_dic[b] = vk.dic[b]
         # get values of all possible settings of untouched bits in g
-        cvs = self.vary_1bit(v, g, cvs)
+        cvs = self.vary_bits(v, g, cvs)
         return cvs, out_dic
