@@ -1,3 +1,5 @@
+2022-06-29->0.308
+- new version of Tail class. Yet to be completed
 2022-06-27->0.307
 - class Tail replacing S2
 2022-04-29->0.306
