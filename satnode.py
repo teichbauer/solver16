@@ -2,7 +2,6 @@ from vklause import VKlause
 from vk12mgr import VK12Manager
 from bitgrid import BitGrid
 from center import Center
-from sat2 import Sat2
 from tail import Tail
 from basics import display_vkdic, ordered_dic_string, verify_sat
 
@@ -48,9 +47,6 @@ class SatNode:
             vk12dic[kn] = vk12
             knss[vk12.nob].append(vk12.kname)
         self.tail = Tail(self, vk12dic, bdic, knss)
-        # self.sat2 = Sat2(self,      # root sat2's parent is this snode
-        #                  None,      # sats: None, otherwise [..]
-        #                  vk12dic)
         x = 1
     # ---- def split_vkm(self) --------
 
@@ -65,9 +61,9 @@ class SatNode:
         else:
             # when there is no more vk3
             Center.last_nov = self.nov
-            root_s2 = Center.snodes[Center.maxnov].sat2
-            root_s2.split2()
-            root_s2.children[1].verify(Center.maxnov, self.nov)
+            root_tail = Center.snodes[Center.maxnov].tail
+            root_tail.split2()
+            root_tail.children[1].verify(Center.maxnov, self.nov)
             x = 1
 
     def make_vk12mdic(self, sumvkdic):
