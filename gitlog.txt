@@ -1,4 +1,6 @@
-2022-07-03->0.3.9
+2022-07-04->0.310
+- design of Tail: on going
+2022-07-03->0.309
 - progress in Tail
 2022-06-29->0.308
 - new version of Tail class. Yet to be completed

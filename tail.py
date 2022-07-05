@@ -1,4 +1,3 @@
-
 class Tail:
     def __init__(self, snode, vk12dic, bitdic, knss):
         self.snode = snode
@@ -18,10 +17,29 @@ class Tail:
             elif esat[bit] != val:
                 return -1
 
+    def verify_sdic(self, sdic, bmap):
+        bits = set(self.sbmap).intersection(bmap)
+        for b in bits:
+            for xcv, xsat in bmap[b]:  # bmap[b]:[(cv, sat), (), ..]
+                for cv, sat in self.sbmap[b]:
+                    if xcv == cv:
+                        if xsat[b] == sat[b]:
+                            print(f"sat: {sat} not added")
+                            sdic[xcv].remove(xsat)
+                        else:
+                            print(f"{cv} bit {b} has conflict.")
 
 
 
-    def update_sdic(self, sdic, sbs):
+
+    def update_sdic(self, sdic, bmap):
+        if len(self.bmap) == 0:
+            self.sbmap = bmap
+            self.sdic = sdic
+            return True
+
+        if self.verify_sdic(sdic, bmap):
+            pass
         for cv, sats in sdic.items():
             lst = self.sdic.setdefault(cv, [])
             for sat in sats:
@@ -40,15 +58,17 @@ class Tail:
         # vk1a=s turned to sats, and the sat-bits will make other vk2s
         # become vk1s: this will loop on, until all vk1s are gone
         sdic = {}
-        bs = []
+        bmap = {}
         for kn in knss[1]:
             vk1 = self.vk12dic.pop(kn)
             bit, val = list(vk1.dic.items())[0]
             bs.append(bit)
             self.bdic[bit].remove(vk1.kname)
             sat = {bit: int(not val)}
+            bit_sats = bmap.setdefault(bit, [])
             for cv in vk1.cvs:
                 sdic.setdefault(cv,[]).append(sat)
+                bit_sats.append((cv, sat))
 
         while len(bs) > 0:
             self.update_sdic(sdic, bs)
@@ -77,5 +97,3 @@ class Tail:
                         new_sdic.setdefault(cv, []).append(sat)
 
         return new_sdic, new_sbits
-
-
