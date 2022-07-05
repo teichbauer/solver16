@@ -17,19 +17,28 @@ class Tail:
             elif esat[bit] != val:
                 return -1
 
-    def verify_sdic(self, sdic, bmap):
-        bits = set(self.sbmap).intersection(bmap)
-        for b in bits:
-            for xcv, xsat in bmap[b]:  # bmap[b]:[(cv, sat), (), ..]
-                for cv, sat in self.sbmap[b]:
-                    if xcv == cv:
-                        if xsat[b] == sat[b]:
-                            print(f"sat: {sat} not added")
-                            sdic[xcv].remove(xsat)
-                        else:
-                            print(f"{cv} bit {b} has conflict.")
-
-
+    def verify(self, bit, old_pairs, new_pairs):
+        res = {}
+        for xcv, xsat in new_pairs:     # outer-loop on new_pairs
+            if xcv in res and res[xcv] == None:
+                continue
+            add_xsat = True
+            for cv, sat in old_pairs:   # inner loop on old_pairs
+                if cv == xcv:
+                    add_xsat = False
+                    if sat[bit] == xsat[bit]:
+                        print(f"{xsat} existed for {xcv} already. not added")
+                    else:
+                        print(f"{xsat} conflicts on {xcv}: kill {xcv}.")
+                        res[cv] = None
+                        # this xcv killed cv. stop loop on old_pairs
+                        # stop inner loop
+                        break
+                else:
+                    pass
+            if add_xsat:
+                res.setdefault(xcv, []).append(xsat)
+        return res
 
 
     def update_sdic(self, sdic, bmap):
@@ -38,15 +47,16 @@ class Tail:
             self.sdic = sdic
             return True
 
-        if self.verify_sdic(sdic, bmap):
-            pass
-        for cv, sats in sdic.items():
-            lst = self.sdic.setdefault(cv, [])
-            for sat in sats:
-                tu = tuple(sat.items())[0]  # {3:1} => (3,1)
-                blst = self.sbmap.setdefault(tu[0], [])
-                lst.append(sat)
-        
+        bits = set(self.sbmap).intersection(bmap)
+        while len(bits) > 0:
+            bit = bits.pop()
+            res = self.verify(bit, self.sbmap[bit], bmap[bit])
+            for cv in res:
+                if res[cv] == None:
+                    self.sdic[cv] = None
+                else:
+                    for xsat in res[cv]:
+                        self.sdic[cv].append(xsat)
 
     def sort_vks(self, bgrid, knss):
         self.cvks_dic = {v: {} for v in bgrid.chvset }
