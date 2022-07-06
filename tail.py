@@ -41,11 +41,6 @@ class Tail:
         shared_bits = set(self.sbmap).intersection(bmap)
         new_bits = set(bmap) - set(self.sbmap)
 
-        for bit in new_bits:
-            for xcv, xsat in bmap[bit]:
-                if self.sdic[xcv] != None:
-                    self.sdic[xcv].append(xsat)
-
         while len(shared_bits) > 0:
             bit = shared_bits.pop()
             res = self.verify(bit, self.sbmap[bit], bmap[bit])
@@ -55,6 +50,11 @@ class Tail:
                 else:
                     for xsat in res[cv]:
                         self.sdic[cv].append(xsat)
+
+        for bit in new_bits:
+            for xcv, xsat in bmap[bit]:
+                if self.sdic[xcv] != None:
+                    self.sdic[xcv].append(xsat)
     # end of --- def update_sdic(self, sdic, bmap):
 
     def _proc_sats(self, sdic, bmap):

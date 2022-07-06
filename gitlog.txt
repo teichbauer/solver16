@@ -1,3 +1,6 @@
+2022-07-06->0.313
+- tested until new_bmap = {}. docs/0312-info.txt
+- issue: self.sbmap not being updated along the way
 2022-07-05->0.312
 - first complete version of Tail
 2022-07-05->0.311
