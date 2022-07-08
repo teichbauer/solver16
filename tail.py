@@ -22,6 +22,8 @@ class Tail:
             vk1 = self.vk12dic.pop(kn)
             bit, val = tuple(vk1.dic.items())[0]  # {11:0} -> 11, 0
             self.bdic[bit].remove(vk1.kname)
+            if len(self.bdic[bit]) == 0:
+                del self.bdic[bit]
             sat = {bit: int(not val)}
             bit_sats = bmap.setdefault(bit, [])
             for cv in vk1.cvs:
@@ -39,7 +41,8 @@ class Tail:
             kns = self.bdic[sb]
             for kn in kns:
                 vk2 = self.vk12dic[kn]
-                comm_cvs = vk2.cvs.intersection(sdic)
+                sat_cvs = [p[0] for p in self.satmgr.bmap[sb]]
+                comm_cvs = vk2.cvs.intersection(sat_cvs)
                 if len(comm_cvs):
                     vk2.pop_cvs(comm_cvs)
                     for cv in comm_cvs:
@@ -47,19 +50,18 @@ class Tail:
                             self.cvks_dic[cv].pop(kn)
                     res = self.vk2_sats(comm_cvs, sb, bmap, vk2)
                     for cv, sat in res.items():
-                        if sat:
-                            new_sdic.setdefault(cv, []).append(sat)
-                            b, v = tuple(sat.keys())[0]
-                            new_bmap.setdefault(b, []).append((cv, sat))
+                        new_sdic.setdefault(cv, []).append(sat)
+                        b, v = tuple(sat.keys())[0]
+                        new_bmap.setdefault(b, []).append((cv, sat))
         return new_sdic, new_bmap
     # end of --- def _proc_sats(self, sdic, bmap):
 
     def vk2_sats(self, comm_cvs, bit, bmap, vk2):
-        res = { cv: None for cv in comm_cvs }
+        res = {}
         d = vk2.dic.copy()
         val = d.pop(bit)
         for cv, sat in bmap[bit]:
-            if cv in res:
+            if cv in comm_cvs:
                 # val == sat[bit] means: vk2.dic[bit] agrees with sat, so that
                 # vk2 -> vk1.dic[other-bit] becomes a new-sat = {b: (not val)}
                 # which will be added to sdic/bmap

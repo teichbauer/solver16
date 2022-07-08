@@ -1,3 +1,5 @@
+## 2022-07-08->0.315
+- fixes in tail.py
 ## 2022-07-07->0.314
 - new class: SatManager
 - on a cv, say cv==3, when the bits from sats overlap with a vk2's bit, making
