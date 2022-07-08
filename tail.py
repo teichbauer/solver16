@@ -38,7 +38,7 @@ class Tail:
         new_bmap = {}
         new_sdic = {}
         for sb in bmap:
-            kns = self.bdic[sb]
+            kns = self.bdic.get(sb,[])  # sb may be missing in bdic -> []
             for kn in kns:
                 vk2 = self.vk12dic[kn]
                 sat_cvs = [p[0] for p in self.satmgr.bmap[sb]]
@@ -51,8 +51,8 @@ class Tail:
                     res = self.vk2_sats(comm_cvs, sb, bmap, vk2)
                     for cv, sat in res.items():
                         new_sdic.setdefault(cv, []).append(sat)
-                        b, v = tuple(sat.keys())[0]
-                        new_bmap.setdefault(b, []).append((cv, sat))
+                        sat_bit = tuple(sat)[0]  # tuple({12:1}) -> (12,)
+                        new_bmap.setdefault(sat_bit, []).append((cv, sat))
         return new_sdic, new_bmap
     # end of --- def _proc_sats(self, sdic, bmap):
 
