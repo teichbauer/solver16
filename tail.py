@@ -4,8 +4,9 @@ class Tail:
     def __init__(self, snode, vk12dic, bitdic, knss):
         self.snode = snode
         self.vk12dic = vk12dic
-        self.bdic = bitdic
-        self.satmgr = SatManager()
+        # vk2-bdic : all vk1s will be removed in sort_vks
+        self.bdic = bitdic  
+        self.satmgr = SatManager(self) 
         self.sort_vks(snode.bgrid, knss)
 
     def sort_vks(self, bgrid, knss):
@@ -29,9 +30,9 @@ class Tail:
             for cv in vk1.cvs:
                 sdic.setdefault(cv,[]).append(sat)
                 bit_sats.append((cv, sat))
-        while len(bmap) > 0:
+        if len(bmap) > 0:
             self.satmgr.add(sdic, bmap)
-            sdic, bmap = self._proc_sats(sdic, bmap)
+            # sdic, bmap = self._proc_sats(sdic, bmap)
     # end of --- def sort_vks(self, bgrid, knss)
 
     def _proc_sats(self, sdic, bmap):

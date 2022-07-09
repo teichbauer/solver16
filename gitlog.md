@@ -1,3 +1,5 @@
+## 2022-07-08->0.317
+- refactoring tail. Not yet tested.
 ## 2022-07-08->0.316
 - fixes in tail.py
 ## 2022-07-08->0.315
