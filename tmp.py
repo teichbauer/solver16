@@ -1,3 +1,15 @@
+        # while len(shared_bits) > 0:
+        #     bit = shared_bits.pop()
+        #     res = self.verify(bit, self.bmap[bit], bmap[bit])
+        #     for cv in res:
+        #         if res[cv] == None:
+        #             self.sdic[cv] = None
+        #         else:
+        #             for xsat in res[cv]:
+        #                 self.sdic[cv].append(xsat)
+        #                 self.bmap.setdefault(bit,[]).append((cv, xsat))
+
+
 
 def make_tree(self):
     self.tree = {}

@@ -18,7 +18,6 @@ class Tail:
                 self.cvks_dic[cv][kn] = vk
         # the bits in all sats will make other vk2s -> vk1s -> sats
         bmap = {}
-        sdic = {}
         for kn in knss[1]:
             vk1 = self.vk12dic.pop(kn)
             bit, val = tuple(vk1.dic.items())[0]  # {11:0} -> 11, 0
@@ -28,10 +27,9 @@ class Tail:
             sat = {bit: int(not val)}
             bit_sats = bmap.setdefault(bit, [])
             for cv in vk1.cvs:
-                sdic.setdefault(cv,[]).append(sat)
                 bit_sats.append((cv, sat))
         if len(bmap) > 0:
-            self.satmgr.add(sdic, bmap)
+            self.satmgr.add(bmap)
             # sdic, bmap = self._proc_sats(sdic, bmap)
     # end of --- def sort_vks(self, bgrid, knss)
 
