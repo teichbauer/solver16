@@ -1,4 +1,5 @@
 from satmgr import SatManager
+from center import Center
 
 class Tail:
     def __init__(self, snode, vk12dic, bitdic, knss):
@@ -30,30 +31,11 @@ class Tail:
                 bit_sats.append((cv, sat))
         if len(bmap) > 0:
             self.satmgr.add(bmap)
-            # sdic, bmap = self._proc_sats(sdic, bmap)
+        for bit in self.bdic:
+            Center.vk2bdic.setdefault(bit,[]).append(
+                (self.snode.nov, len(self.bdic[bit])))
+        x = 0
     # end of --- def sort_vks(self, bgrid, knss)
-
-    def _proc_sats(self, sdic, bmap):
-        new_bmap = {}
-        new_sdic = {}
-        for sb in bmap:
-            kns = self.bdic.get(sb,[])  # sb may be missing in bdic -> []
-            for kn in kns:
-                vk2 = self.vk12dic[kn]
-                sat_cvs = [p[0] for p in self.satmgr.bmap[sb]]
-                comm_cvs = vk2.cvs.intersection(sat_cvs)
-                if len(comm_cvs):
-                    vk2.pop_cvs(comm_cvs)
-                    for cv in comm_cvs:
-                        if kn in self.cvks_dic[cv]:
-                            self.cvks_dic[cv].pop(kn)
-                    res = self.vk2_sats(comm_cvs, sb, bmap, vk2)
-                    for cv, sat in res.items():
-                        new_sdic.setdefault(cv, []).append(sat)
-                        sat_bit = tuple(sat)[0]  # tuple({12:1}) -> (12,)
-                        new_bmap.setdefault(sat_bit, []).append((cv, sat))
-        return new_sdic, new_bmap
-    # end of --- def _proc_sats(self, sdic, bmap):
 
     def vk2_sats(self, comm_cvs, bit, bmap, vk2):
         res = {}

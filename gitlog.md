@@ -1,3 +1,6 @@
+## 2022-07-15->0.319
+- refactor tail
+- center.vk2bdic for choosing bit for split
 ## 2022-07-12->0.318
 - refactored tail, satmgr. finished tail setups for all sn(50-21)
 - draw a bit map for every sn in 0318-info.txt

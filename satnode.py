@@ -59,11 +59,8 @@ class SatNode:
                                 self.vkm)
             return self.next.spawn()
         else:
-            # when there is no more vk3
-            Center.last_nov = self.nov
-            root_tail = Center.snodes[Center.maxnov].tail
-            root_tail.split2()
-            root_tail.children[1].verify(Center.maxnov, self.nov)
+            x = 0
+            max_dic = Center.get_maxes()
             x = 1
 
     def make_vk12mdic(self, sumvkdic):

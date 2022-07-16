@@ -1,6 +1,4 @@
 from basics import verify_sat
-# from sat2 import Sat2
-
 
 class Center:
     maxnov = 0
@@ -12,6 +10,7 @@ class Center:
     vk12kndic = {}  # {nov: [kns]}
     sumbdic = {}
     sumvk12dic = {}
+    vk2bdic = {}  # <bit>:[<tail1>,<tail2>,...], <bit>:[],..}
     orig_vkm = None
 
     @classmethod
@@ -24,6 +23,16 @@ class Center:
         nov = cls.maxnov
         x = 1
         # sn = cls.snodes[nov]
+
+    @classmethod
+    def get_maxes(cls):
+        max_dic = {}  # {bid:[max-tails, max-vk2s]}
+        for b, lst in cls.vk2bdic.items():
+            m = 0
+            for pair in lst:
+                m +=  pair[1]
+            max_dic[b] = (len(lst), m)
+        return max_dic
 
     @classmethod
     def solve(cls):
