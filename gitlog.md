@@ -1,3 +1,8 @@
+## 2022-07-17->0.3.20
+- refactored tail.py
+- new: branch.py
+- get rid of center.sumvk12dic, .solve(), get_maxes -> get_maxbit
+- no more kss in tail-contructor/snode
 ## 2022-07-15->0.319
 - refactor tail
 - center.vk2bdic for choosing bit for split

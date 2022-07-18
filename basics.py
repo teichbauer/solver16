@@ -13,6 +13,10 @@ def verify_sat(vkdic, sat, collect=False):
         return lst
     return True
 
+def vk1_to_sat(vk1):
+    # vk.dic: {12:0} -> sat = {12:1}
+    b, v = tuple(vk1.dic.items())[0]
+    return {b: int(not(v))}
 
 def nov_val(msg):  # '12.4' -> 12, 4
     lst = []

@@ -9,7 +9,6 @@ class Center:
     snodes = {}
     vk12kndic = {}  # {nov: [kns]}
     sumbdic = {}
-    sumvk12dic = {}
     vk2bdic = {}  # <bit>:[<tail1>,<tail2>,...], <bit>:[],..}
     orig_vkm = None
 
@@ -25,25 +24,26 @@ class Center:
         # sn = cls.snodes[nov]
 
     @classmethod
-    def get_maxes(cls):
+    def get_maxbit(cls, choose_tail=False): # choose max tail or max vk2
         max_dic = {}  # {bid:[max-tails, max-vk2s]}
         for b, lst in cls.vk2bdic.items():
             m = 0
             for pair in lst:
                 m +=  pair[1]
             max_dic[b] = (len(lst), m)
-        return max_dic
+        # make choice based on max-tail, or max-vk2
+        max_bit = -1
+        val = 0
+        for b in max_dic:
+            if choose_tail:
+                xval = max_dic[b][0]
+            else:
+                xval = max_dic[b][1]
+            if xval > val:
+                max_bit = b
+                val = xval
+        return max_bit
 
-    @classmethod
-    def solve(cls):
-        # sat2 = Sat2(None, None, cls.sumvk12dic)
-        # sat2.split2()
-        # if sat2.children[1]:
-        #     # sat2.children[1].verify(cls.vk12kndic, cls.maxnov, cls.last_nov)
-        #     sat2.children[1].verify(cls.maxnov, cls.last_nov)
-        # if sat2.children[0]:
-        #     sat2.children[0].verify(cls.maxnov, cls.last_nov)
-        x = 1
 
     @classmethod
     def set_satbits(cls):

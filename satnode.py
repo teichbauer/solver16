@@ -3,8 +3,8 @@ from vk12mgr import VK12Manager
 from bitgrid import BitGrid
 from center import Center
 from tail import Tail
-from basics import display_vkdic, ordered_dic_string, verify_sat
-
+from basics import display_vkdic, ordered_dic_string, verify_sat, vk1_to_sat
+from branch import Branch
 
 class SatNode:
 
@@ -35,18 +35,22 @@ class SatNode:
 
         bdic = Center.sumbdic.setdefault(self.nov, {})
         vk12dic = {}
-        knss = {1:[], 2:[]}   # [[k1ns-list], [kn2s-list]]
 
+        bmap = {}  # {bid:[(cv1, sat),(cv2, sat)]}
         for kn in self.touched:
             vk = self.vkm.pop_vk(kn)        # pop out 3vk
             vk12 = self.bgrid.reduce_vk(vk) # make it vk12
-            Center.sumvk12dic[kn] = vk12
-            for b, v in vk12.dic.items():
-                bdic.setdefault(b, set([])).add(kn)
-            vk12kns.append(kn)
-            vk12dic[kn] = vk12
-            knss[vk12.nob].append(vk12.kname)
-        self.tail = Tail(self, vk12dic, bdic, knss)
+            if vk12.nob == 1:
+                sat = vk1_to_sat(vk12)
+                print(f"{kn}-{tuple(vk12.cvs)}  becomes sat: {sat}")
+                for cv in vk12.cvs:
+                    bmap.setdefault(vk12.bits[0],[]).append((cv, sat))
+            else:  # vk12.nob == 2
+                for b, v in vk12.dic.items():
+                    bdic.setdefault(b, set([])).add(kn)
+                vk12kns.append(kn)
+                vk12dic[kn] = vk12
+        self.tail = Tail(self, vk12dic, bdic, bmap)
         x = 1
     # ---- def split_vkm(self) --------
 
@@ -59,8 +63,9 @@ class SatNode:
                                 self.vkm)
             return self.next.spawn()
         else:
-            x = 0
-            max_dic = Center.get_maxes()
+            branch0 = Branch(Center.vk2bdic, Center.snodes[Center.maxnov])
+            split_bit = branch0.get_splitbit()
+            brch10, brch11 = branch0.split(split_bit)
             x = 1
 
     def make_vk12mdic(self, sumvkdic):

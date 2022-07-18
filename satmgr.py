@@ -2,10 +2,12 @@ from vk12mgr import VK12Manager
 
 
 class SatManager:
-    def __init__(self, owner):
+    def __init__(self, owner, bmap=None):
         self.owner = owner
         self.sdic = {}
         self.bmap = {}
+        if bmap:
+            self.add(bmap)
 
     def expand_bmap(self, bits):
         bmap = {}
@@ -32,7 +34,6 @@ class SatManager:
         return bmap
 
     def add(self, bmap):
-        shared_bits = set(self.bmap).intersection(bmap)
         new_bits = set(bmap) - set(self.bmap)
         for bit in new_bits:
             for xcv, xsat in bmap[bit]:
