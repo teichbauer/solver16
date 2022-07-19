@@ -1,4 +1,7 @@
-## 2022-07-17->0.3.20
+## 2022-07-18->0.321
+- refactored satmgr.py. It worked all hte way till snode.nov == 21
+  the branch/split should start
+## 2022-07-17->0.320
 - refactored tail.py
 - new: branch.py
 - get rid of center.sumvk12dic, .solve(), get_maxes -> get_maxbit

@@ -1,6 +1,5 @@
 from datetime import datetime
 
-
 def verify_sat(vkdic, sat, collect=False):
     lst = set([])
     for vk in vkdic.values():

@@ -1,3 +1,34 @@
+# from satmgr.py
+    def vk1_sat(self, comm_cvs, bit, val, vk1):
+        res = {}
+        for xcvs, xsat in self.bmap[bit]:
+            if xsat[bit] != val:
+                continue
+            cvs = comm_cvs.intersection(xcvs)
+            if len(cvs) > 0:
+                res[tuple(cvs)] = vk1_to_sat(vk1)
+        return res
+
+    def vk2_sats(self, comm_cvs, bit, vk2):
+        res = {}
+        d = vk2.dic.copy()
+        val = d.pop(bit)
+        for cvs, sat in self.bmap[bit]:
+            for cv in cvs:
+                if cv in comm_cvs:
+                    # val == sat[bit] means: vk2.dic[bit] agrees with sat, 
+                    # so that vk2 -> vk1.dic[other-bit] becomes a 
+                    # new-sat = {b: (not val)}, which will be added to sdic/bmap
+                    # ----------------------------------------------------------
+                    # if val != sat[bit], the sat already makes vk2 a non-hit:
+                    # this vk2 should not be in cvks_dic[cv]
+                    if sat[bit] == val:
+                        b, v = tuple(d.items())[0]
+                        res[cv] = {b: int(not(v))}
+        return res
+    # end of ---  def vk2_sats(self, comm_cvs, bit, bmap, vk2):
+# end of # from satmgr.py --------------------------
+
         # while len(shared_bits) > 0:
         #     bit = shared_bits.pop()
         #     res = self.verify(bit, self.bmap[bit], bmap[bit])

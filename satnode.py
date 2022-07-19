@@ -43,8 +43,7 @@ class SatNode:
             if vk12.nob == 1:
                 sat = vk1_to_sat(vk12)
                 print(f"{kn}-{tuple(vk12.cvs)}  becomes sat: {sat}")
-                for cv in vk12.cvs:
-                    bmap.setdefault(vk12.bits[0],[]).append((cv, sat))
+                bmap.setdefault(vk12.bits[0],[]).append((tuple(vk12.cvs),sat))
             else:  # vk12.nob == 2
                 for b, v in vk12.dic.items():
                     bdic.setdefault(b, set([])).add(kn)
