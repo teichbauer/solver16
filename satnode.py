@@ -34,7 +34,7 @@ class SatNode:
         vk12kns = Center.vk12kndic.setdefault(self.nov, [])
 
         bdic = Center.sumbdic.setdefault(self.nov, {})
-        vk12dic = {}
+        vk2dic = {}
 
         bmap = {}  # {bid:[(cv1, sat),(cv2, sat)]}
         for kn in self.touched:
@@ -48,8 +48,8 @@ class SatNode:
                 for b, v in vk12.dic.items():
                     bdic.setdefault(b, set([])).add(kn)
                 vk12kns.append(kn)
-                vk12dic[kn] = vk12
-        self.tail = Tail(self, vk12dic, bdic, bmap)
+                vk2dic[kn] = vk12
+        self.tail = Tail(self, vk2dic, bdic, bmap)
         x = 1
     # ---- def split_vkm(self) --------
 

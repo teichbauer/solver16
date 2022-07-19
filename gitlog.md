@@ -1,3 +1,5 @@
+## 2022-07-18->0.322
+- tail.vk12dic renamed to be vk2dic
 ## 2022-07-18->0.321
 - refactored satmgr.py. It worked all hte way till snode.nov == 21
   the branch/split should start
