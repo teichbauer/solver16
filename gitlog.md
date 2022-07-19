@@ -1,3 +1,5 @@
+## 2022-07-19->0.323
+- satmge.clone, tail.clone
 ## 2022-07-18->0.322
 - tail.vk12dic renamed to be vk2dic
 ## 2022-07-18->0.321

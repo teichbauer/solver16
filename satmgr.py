@@ -9,7 +9,10 @@ class SatManager:
             self.add(bmap)
 
     def add(self, bmap):
-        new_bits = set(bmap) - set(self.bmap)
+        if len(self.bmap) == 0:
+            new_bits = set(bmap)
+        else:
+            new_bits = set(bmap) - set(self.bmap)
         for bit in new_bits:
             for xcv, xsat in bmap[bit]:
                 self.bmap.setdefault(bit, []).append((xcv, xsat))
@@ -17,6 +20,12 @@ class SatManager:
         bmap = self.expand_bmap(new_bits)
         if len(bmap) > 0:
             self.add(bmap)
+
+    def clone(self):
+        new_satmgr = SatManager(self.owner)
+        new_satmgr.add(self.bmap)
+        return new_satmgr
+
 
     def expand_bmap(self, bits):
         bmap = {}
@@ -27,7 +36,7 @@ class SatManager:
                 continue
             cvs_sat_lst = [p for p in self.bmap[bit]]
             for kn2 in kn2s:
-                vk2 = self.owner.vk12dic[kn2]
+                vk2 = self.owner.vk2dic[kn2]
                 for xcvs, xsat in cvs_sat_lst:
                     comm_cvs = vk2.cvs.intersection(xcvs)
                     if len(comm_cvs) > 0:

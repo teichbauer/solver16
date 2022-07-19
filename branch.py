@@ -1,32 +1,27 @@
 from center import Center
 
 class Branch:
-    def __init__(self, bdic, snode):
-        self.bdic = bdic
+    def __init__(self, sumbdic, snode):
+        self.sumbdic = sumbdic
         self.snode = snode
 
 
     def split(self, splitbit):
-        tail = self.snode.tail
-        bd = tail.bdic.copy()
-        kn2s = bd.pop(splitbit)
-        dic0 = { 'sats': [{splitbit: 0}], 'vk12dic': tail.vk12dic.copy()}
-        dic1 = { 'sats': [{splitbit: 1}], 'vk12dic': tail.vk12dic.copy()}
-
-        for kn2 in kn2s:
-            pass
-
+        tail0 = self.snode.tail.clone({splitbit: 0})
+        tail1 = self.snode.tail.clone({splitbit: 1})
 
         x = 1
 
 
     def get_splitbit(self, choose_tail=False): # choose max tail or max vk2
         max_dic = {}  # {bid:[max-tails, max-vk2s]}
-        for b, lst in self.bdic.items():
-            m = 0
-            for pair in lst:
-                m +=  pair[1]
-            max_dic[b] = (len(lst), m)
+        for nov, dic in self.sumbdic.items():
+            for b, lst in dic.items():
+                m = len(lst)
+                pair = max_dic.setdefault(b, [0,0])
+                pair[0] += 1
+                pair[1] += m
+            x = 0
         # make choice based on max-tail, or max-vk2
         max_bit = -1
         val = 0
