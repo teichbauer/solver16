@@ -31,7 +31,8 @@ class SatManager:
         bmap = {}
         while len(bits) > 0:  # bits is a set
             bit = bits.pop()
-            kn2s = self.owner.bdic.get(bit, [])
+            # kn2s = bdic.get(bit, []) may ge modified, so use a copy
+            kn2s = self.owner.bdic.get(bit, []).copy()
             if len(kn2s) == 0:
                 continue
             cvs_sat_lst = [p for p in self.bmap[bit]]
@@ -41,6 +42,8 @@ class SatManager:
                     comm_cvs = vk2.cvs.intersection(xcvs)
                     if len(comm_cvs) > 0:
                         vk2.pop_cvs(comm_cvs)
+                        if len(vk2.cvs) == 0:
+                            self.owner.remove_vk2(vk2)
                         for cv in comm_cvs:
                             if kn2 in self.owner.cvks_dic[cv]:
                                 self.owner.cvks_dic[cv].pop(kn2)

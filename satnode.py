@@ -62,7 +62,7 @@ class SatNode:
                                 self.vkm)
             return self.next.spawn()
         else:
-            branch0 = Branch(Center.sumbdic, Center.snodes[Center.maxnov])
+            branch0 = Branch(Center.sumbdic, Center.get_tailchain())
             split_bit = branch0.get_splitbit()
             brch10, brch11 = branch0.split(split_bit)
             x = 1

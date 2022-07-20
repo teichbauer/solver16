@@ -18,12 +18,25 @@ class Tail:
             for cv in vk.cvs:
                 self.cvks_dic[cv][kn] = vk
         x = 0
+
+    def remove_vk2(self, vk2):
+        # vk2.cvs became empty, remove it from vk2dic, and bdic
+        kn = vk2.kname
+        self.vk2dic.pop(kn, None)
+        for b in vk2.bits:
+            if kn in self.bdic[b]:
+                self.bdic[b].remove(kn)
+                if len(self.bdic[b]) == 0:
+                    del self.bdic[b]
+            
     
-    def clone(self, split_sat):
-        new_tail = Tail(
+    def clone(self, split_sat, splitbit):
+        ntail = Tail(
             self.snode, 
             self.vk2dic.copy(),
             self.bdic.copy())
-        new_tail.satmgr = self.satmgr.clone()
+        ntail.satmgr = self.satmgr.clone()
+        bmap = {splitbit:[((0,1,2,3,4,5,6,7), split_sat)]}
+        ntail.satmgr.add(bmap)
         x = 0
-        return new_tail
+        return ntail

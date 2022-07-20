@@ -1,17 +1,33 @@
 from center import Center
 
 class Branch:
-    def __init__(self, sumbdic, snode):
+    def __init__(self, sumbdic, tail_chain, sat = None):
         self.sumbdic = sumbdic
-        self.snode = snode
+        self.chain = tail_chain
+        if sat == None:
+            self.sat = {}
+        else:
+            self.sat = sat
 
 
-    def split(self, splitbit):
-        tail0 = self.snode.tail.clone({splitbit: 0})
-        tail1 = self.snode.tail.clone({splitbit: 1})
+    def split(self, bit):
+        self.bit = bit
+        ssat0 = {bit: 0}
+        ssat1 = {bit: 1}
+        b0 = Branch(None, self.clone_chain(ssat0), ssat0)
+        b1 = Branch(None, self.clone_chain(ssat1), ssat1)
+        return b0, b1
 
-        x = 1
+    def clone_chain(self, ssat):
+        nchain = {}
+        for nov, tail in self.chain.items():
+            nchain[nov] = tail.clone(ssat, self.bit)
+        return nchain
 
+    def clone_sumbdic(self, ssat):
+        sumbdic = {}
+        for nv, dic in self.sumbdic.items():
+            pass
 
     def get_splitbit(self, choose_tail=False): # choose max tail or max vk2
         max_dic = {}  # {bid:[max-tails, max-vk2s]}

@@ -1,3 +1,8 @@
+## 2022-07-19->0.324
+- more implementations in branch
+- center.get_tailchain
+- some fixes in satmgr
+- tail: remove_vk2, clone
 ## 2022-07-19->0.323
 - satmge.clone, tail.clone
 ## 2022-07-18->0.322

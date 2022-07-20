@@ -24,26 +24,11 @@ class Center:
         # sn = cls.snodes[nov]
 
     @classmethod
-    def get_maxbit(cls, choose_tail=False): # choose max tail or max vk2
-        max_dic = {}  # {bid:[max-tails, max-vk2s]}
-        for b, lst in cls.vk2bdic.items():
-            m = 0
-            for pair in lst:
-                m +=  pair[1]
-            max_dic[b] = (len(lst), m)
-        # make choice based on max-tail, or max-vk2
-        max_bit = -1
-        val = 0
-        for b in max_dic:
-            if choose_tail:
-                xval = max_dic[b][0]
-            else:
-                xval = max_dic[b][1]
-            if xval > val:
-                max_bit = b
-                val = xval
-        return max_bit
-
+    def get_tailchain(cls):
+        chain = {}
+        for nov, sn in cls.snodes.items():
+            chain[nov] = sn.tail
+        return chain
 
     @classmethod
     def set_satbits(cls):
