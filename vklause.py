@@ -18,11 +18,17 @@ class VKlause:
         self.nov = nov
         self.cvs = cvs  # a set of values (as chvkdic[v]) this vk is in
 
-    def hbit_value(self):
-        return self.bits[0], self.dic[self.bits[0]]
+    def hbit_value(self): # return pair: bit[0], val[bts[0]]
+        b = self.bits[0]
+        return b, self.dic[b]
+
+    def sat1(self): # only for vk1
+        b, v = self.hbit_value()
+        return b, int(not v)
 
     def lbit_value(self):
-        return self.dic[self.bits[-1]]
+        b = self.bits[-1]
+        return b, self.dic[b]
 
     def cut_bit(self, bit):
         if self.nob < 2 or not (bit in self.bits):

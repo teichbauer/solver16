@@ -1,3 +1,8 @@
+## 2022-07-21->0.326
+- refactored bmap:{bit: [(cvs, sat),(cvs,sat)], bit:[]} to
+  sat_cvs_dic: {bit: {0:cvs, 1:cvs}, bit: {},...}
+- vklause sat1() turning a vk1 to a sat-pair (bit, value)
+- remove basic/vk1_to_sat
 ## 2022-07-20->0.325
 - refactored satmgr.add, removed clone
 - tail: remove_kn2_from_cvk_dic, copy_bdic, copy_cvks_dic. refactored clone

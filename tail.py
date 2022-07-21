@@ -2,14 +2,14 @@ from satmgr import SatManager
 from center import Center
 
 class Tail:
-    def __init__(self, snode, vk2dic, bitdic, bmap=None):
+    def __init__(self, snode, vk2dic, bitdic, sat_cvs_dic=None):
         self.snode = snode
         self.vk2dic = vk2dic
         # vk2-bdic : all vk1s will be removed in sort_vks
         self.bdic = self.copy_bdic(bitdic)
-        if bmap != None:  # bmap==None: for clone
+        if sat_cvs_dic != None:  # sat_cvs_dic==None: for clone
             self.sort_vks()
-            self.satmgr = SatManager(self, bmap) 
+            self.satmgr = SatManager(self, sat_cvs_dic) 
 
     def sort_vks(self):
         self.cvks_dic = {v: set([]) for v in self.snode.bgrid.chvset }
@@ -38,7 +38,7 @@ class Tail:
         )
         ntail.cvks_dic = self.copy_cvks_dic(self.cvks_dic)
         ntail.satmgr = SatManager(ntail) # self.satmgr.clone(ntail)
-        ntail.satmgr.add(self.satmgr.bmap)
+        ntail.satmgr.add(self.satmgr.sat_cvs_dic)
         # ntail.satmgr.ori = self
         ntail.satmgr.add({splitbit:[(tuple(range(8)), split_sat)]})
         x = 0
