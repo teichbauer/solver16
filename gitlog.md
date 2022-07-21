@@ -1,3 +1,7 @@
+## 2022-07-20->0.325
+- refactored satmgr.add, removed clone
+- tail: remove_kn2_from_cvk_dic, copy_bdic, copy_cvks_dic. refactored clone
+- vklause.clone now copies cvs(set) to the clone, if no delta is given.
 ## 2022-07-19->0.324
 - more implementations in branch
 - center.get_tailchain

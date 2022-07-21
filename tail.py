@@ -6,17 +6,17 @@ class Tail:
         self.snode = snode
         self.vk2dic = vk2dic
         # vk2-bdic : all vk1s will be removed in sort_vks
-        self.bdic = bitdic  
+        self.bdic = self.copy_bdic(bitdic)
         if bmap != None:  # bmap==None: for clone
             self.sort_vks()
             self.satmgr = SatManager(self, bmap) 
 
     def sort_vks(self):
-        self.cvks_dic = {v: {} for v in self.snode.bgrid.chvset }
+        self.cvks_dic = {v: set([]) for v in self.snode.bgrid.chvset }
         # only care about vk2s. All vk1s will become sats
         for kn, vk in self.vk2dic.items():  
             for cv in vk.cvs:
-                self.cvks_dic[cv][kn] = vk
+                self.cvks_dic[cv].add(kn)
         x = 0
 
     def remove_vk2(self, vk2):
@@ -34,9 +34,29 @@ class Tail:
         ntail = Tail(
             self.snode, 
             self.vk2dic.copy(),
-            self.bdic.copy())
-        ntail.satmgr = self.satmgr.clone()
-        bmap = {splitbit:[((0,1,2,3,4,5,6,7), split_sat)]}
-        ntail.satmgr.add(bmap)
+            self.copy_bdic(self.bdic)
+        )
+        ntail.cvks_dic = self.copy_cvks_dic(self.cvks_dic)
+        ntail.satmgr = SatManager(ntail) # self.satmgr.clone(ntail)
+        ntail.satmgr.add(self.satmgr.bmap)
+        # ntail.satmgr.ori = self
+        ntail.satmgr.add({splitbit:[(tuple(range(8)), split_sat)]})
         x = 0
         return ntail
+
+    def remove_kn2_from_cvk_dic(self, cvs, kn2):
+        for cv in cvs:
+            if kn2 in self.cvks_dic[cv]:
+                self.cvks_dic[cv].remove(kn2)
+
+    def copy_bdic(self, bdic):
+        dic = {}
+        for bit, val in bdic.items():
+            dic[bit] = list(val)
+        return dic
+
+    def copy_cvks_dic(self, cvks_dic):
+        dic = {}
+        for cv, val in cvks_dic.items():
+            dic[cv] = set(val)
+        return dic

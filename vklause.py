@@ -42,7 +42,8 @@ class VKlause:
             cvs = cvs - set(delta_cvs['-'])
             cvs = cvs.union(delta_cvs['+'])
         else:
-            cvs = set([])
+            # cvs = set([])
+            cvs = self.cvs.copy()
             
         if bits2b_dropped and len(bits2b_dropped) > 0:
             for b in bits2b_dropped:

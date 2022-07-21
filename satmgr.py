@@ -1,4 +1,4 @@
-from vk12mgr import VK12Manager
+from center import Center
 from basics import vk1_to_sat
 
 class SatManager:
@@ -9,22 +9,23 @@ class SatManager:
             self.add(bmap)
 
     def add(self, bmap):
-        if len(self.bmap) == 0:
-            new_bits = set(bmap)
-        else:
-            new_bits = set(bmap) - set(self.bmap)
-        for bit in new_bits:
-            for xcv, xsat in bmap[bit]:
-                self.bmap.setdefault(bit, []).append((xcv, xsat))
+        for bit in bmap:
+            for xcvs, xsat in bmap[bit]:
+                old_lst = self.bmap.setdefault(bit,[])
+                ind = -1
+                ncvs = None
+                for index, (ycvs, ysat) in enumerate(old_lst):
+                    if xsat == ysat:
+                        ind = index
+                        ncvs = tuple(set(xcvs).union(ycvs))
+                if ind == -1:
+                    self.bmap.setdefault(bit,[]).append((xcvs, xsat))
+                else:  # there has bee xsat on ind: set the unioned ncvs to it
+                    self.bmap[bit][ind] = (ncvs, xsat)
         
-        bmap = self.expand_bmap(new_bits)
+        bmap = self.expand_bmap(list(bmap))
         if len(bmap) > 0:
             self.add(bmap)
-
-    def clone(self):
-        new_satmgr = SatManager(self.owner)
-        new_satmgr.add(self.bmap)
-        return new_satmgr
 
 
     def expand_bmap(self, bits):
@@ -41,15 +42,20 @@ class SatManager:
                 for xcvs, xsat in cvs_sat_lst:
                     comm_cvs = vk2.cvs.intersection(xcvs)
                     if len(comm_cvs) > 0:
-                        vk2.pop_cvs(comm_cvs)
-                        if len(vk2.cvs) == 0:
-                            self.owner.remove_vk2(vk2)
-                        for cv in comm_cvs:
-                            if kn2 in self.owner.cvks_dic[cv]:
-                                self.owner.cvks_dic[cv].pop(kn2)
-                        if vk2.dic[bit] != xsat[bit]:
+                        # since vk2 in vk2dic is a ref, and here the vk2
+                        # is modified, replace this vk2 with a clone, so tha
+                        # the modification will not harm the original vk2
+                        vk2_clone = vk2.clone()
+                        self.owner.vk2dic[kn2] = vk2_clone
+                        vk2_clone.pop_cvs(comm_cvs)
+                        if len(vk2_clone.cvs) == 0:
+                            self.owner.remove_vk2(vk2_clone)
+
+                        self.owner.remove_kn2_from_cvk_dic(comm_cvs, kn2)
+
+                        if vk2_clone.dic[bit] != xsat[bit]:
                             continue
-                        vk1 = vk2.clone([bit])
+                        vk1 = vk2_clone.clone([bit])
                         nsat = vk1_to_sat(vk1)
                         bmap.setdefault(vk1.bits[0],[]).append((comm_cvs, nsat))
         return bmap
