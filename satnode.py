@@ -52,7 +52,8 @@ class SatNode:
                 vk12kns.append(kn)
                 vk2dic[kn] = vk12
         self.tail = Tail(self, vk2dic, bdic, sat_cvs_dic)
-        print(f"bmap: {self.tail.satmgr.sat_cvs_dic}")
+        Center.root_branch.add_tail(self.nov, self.tail)
+        print(f"bmap: {self.tail.satmgr.sat_cvs_dic}\n")
         x = 1
     # ---- def split_vkm(self) --------
 
@@ -65,9 +66,10 @@ class SatNode:
                                 self.vkm)
             return self.next.spawn()
         else:
-            branch0 = Branch(Center.sumbdic, Center.get_tailchain())
-            split_bit = branch0.get_splitbit()
-            brch10, brch11 = branch0.split(split_bit)
+            # branch0 = Branch(Center.sumbdic, Center.get_tailchain())
+            split_bit = Center.root_branch.get_bestbit()
+            # split_bit = branch0.get_splitbit()
+            brch10, brch11 = Center.root_branch.split(split_bit)
             x = 1
 
     def make_vk12mdic(self, sumvkdic):

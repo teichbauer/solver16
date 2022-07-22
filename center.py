@@ -1,4 +1,5 @@
 from basics import verify_sat
+from branch import Branch
 
 class Center:
     maxnov = 0
@@ -11,6 +12,7 @@ class Center:
     sumbdic = {}
     vk2bdic = {}  # <bit>:[<tail1>,<tail2>,...], <bit>:[],..}
     orig_vkm = None
+    root_branch = Branch()
 
     @classmethod
     def set_maxnov(cls, nov):
