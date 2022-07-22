@@ -1,3 +1,5 @@
+## 2022-07-21->0.327
+- snode, tail displaying info
 ## 2022-07-21->0.326
 - refactored bmap:{bit: [(cvs, sat),(cvs,sat)], bit:[]} to
   sat_cvs_dic: {bit: {0:cvs, 1:cvs}, bit: {},...}

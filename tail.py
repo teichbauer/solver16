@@ -39,9 +39,13 @@ class Tail:
         ntail.cvks_dic = self.copy_cvks_dic(self.cvks_dic)
         ntail.satmgr = SatManager(ntail) # self.satmgr.clone(ntail)
         ntail.satmgr.add(self.satmgr.sat_cvs_dic)
-        # ntail.satmgr.ori = self
-        ntail.satmgr.add({splitbit:[(tuple(range(8)), split_sat)]})
-        x = 0
+        # ntail.satmgr.add({splitbit:[(tuple(range(8)), split_sat)]})
+        ntail.satmgr.add({splitbit:{split_sat[splitbit]:tuple(range(8))}})
+        info = ntail.metrics()
+        info0 = Center.snodes[self.snode.nov].tail.metrics()
+        print(f"{self.snode.nov}/{split_sat}:")
+        print(f"{info}, from  :")
+        print(info0)
         return ntail
 
     def remove_kn2_from_cvk_dic(self, cvs, kn2):
@@ -59,4 +63,13 @@ class Tail:
         dic = {}
         for cv, val in cvks_dic.items():
             dic[cv] = set(val)
+        return dic
+
+    def metrics(self):
+        dic = {
+            'vk2s': len(self.vk2dic),
+            'bdic': len(self.bdic),
+        }
+        for cv, lst in self.cvks_dic.items():
+            dic.setdefault(cv, len(lst))
         return dic

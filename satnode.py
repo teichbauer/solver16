@@ -37,6 +37,7 @@ class SatNode:
         vk2dic = {}
 
         sat_cvs_dic = {}
+        print(f"------- {self.nov} -----------")
         for kn in self.touched:
             vk = self.vkm.pop_vk(kn)        # pop out 3vk
             vk12 = self.bgrid.reduce_vk(vk) # make it vk12
@@ -51,6 +52,7 @@ class SatNode:
                 vk12kns.append(kn)
                 vk2dic[kn] = vk12
         self.tail = Tail(self, vk2dic, bdic, sat_cvs_dic)
+        print(f"bmap: {self.tail.satmgr.sat_cvs_dic}")
         x = 1
     # ---- def split_vkm(self) --------
 
