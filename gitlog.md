@@ -1,3 +1,8 @@
+## 2022-07-23->0.329
+- refavtored branch
+- center.root_branch
+- refactored tail, modified snode
+- in stead of picking teh bit of most vk2s, pick least used bit
 ## 2022-07-22->0.328
 - refactored branch
 - root_branch under Center

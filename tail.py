@@ -1,15 +1,21 @@
 from satmgr import SatManager
 from center import Center
+from branch import Branch
 
 class Tail:
     def __init__(self, snode, vk2dic, bitdic, sat_cvs_dic=None):
         self.snode = snode
         self.vk2dic = vk2dic
+        self.splitbit = -1
         # vk2-bdic : all vk1s will be removed in sort_vks
         self.bdic = self.copy_bdic(bitdic)
         if sat_cvs_dic != None:  # sat_cvs_dic==None: for clone
             self.sort_vks()
             self.satmgr = SatManager(self, sat_cvs_dic) 
+        if Center.root_branch == None:
+            Center.root_branch = Branch()
+        Center.root_branch.add_tail(self.snode.nov, self)
+
 
     def sort_vks(self):
         self.cvks_dic = {v: set([]) for v in self.snode.bgrid.chvset }
@@ -36,17 +42,16 @@ class Tail:
             self.vk2dic.copy(),
             self.copy_bdic(self.bdic)
         )
+        ntail.splitbit = splitbit
         ntail.cvks_dic = self.copy_cvks_dic(self.cvks_dic)
         ntail.satmgr = SatManager(ntail) # self.satmgr.clone(ntail)
         ntail.satmgr.add(self.satmgr.sat_cvs_dic)
         # ntail.satmgr.add({splitbit:[(tuple(range(8)), split_sat)]})
         ntail.satmgr.add({splitbit:{split_sat[splitbit]:tuple(range(8))}})
-        info = ntail.metrics()
-        info0 = Center.snodes[self.snode.nov].tail.metrics()
-        print(f"{self.snode.nov}/{split_sat}:")
-        print(f"{info}, from  :")
-        print(info0)
         return ntail
+
+    def proc_svks(self, bits):
+        x = 1
 
     def remove_kn2_from_cvk_dic(self, cvs, kn2):
         for cv in cvs:
@@ -72,4 +77,6 @@ class Tail:
         }
         for cv, lst in self.cvks_dic.items():
             dic.setdefault(cv, len(lst))
-        return dic
+        msg = f"{self.snode.nov}/{self.splitbit}:\n"
+        msg += f"{dic}, \nbmap: {self.satmgr.sat_cvs_dic}."
+        return msg
