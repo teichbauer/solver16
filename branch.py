@@ -1,12 +1,17 @@
 from center import Center
 
 class Branch:
-    def __init__(self):
+    def __init__(self, parent, name='R', sat=None):  # R:Root
+        self.parent = parent
+        self.name = name
         self.sumbdic = {}
         self.novs = []  # list of descending novs
         self.chain = {}
         self.single_vk_bdic = {} # {nov: [bit, bit, ..], nov:[],...}  
-        self.sat = {}
+        if sat == None:
+            self.sat = {}
+        else:
+            self.sat = sat
 
     def add_tail(self, nov, tail):
         self.novs.append(nov)
@@ -23,7 +28,7 @@ class Branch:
                 self.sumbdic[b] = cnt
         if len(sbits) > 0:
             self.single_vk_bdic[tail.snode.nov] = sbits
-        # self.show_bdic()
+        # self.show_sumbdic()
 
     # process bits where tails of any nov has 1 vk2 sitting on it
     def crunch_svks(self):
@@ -41,33 +46,38 @@ class Branch:
         return bit
 
     def split(self):
-        self.get_svk_bit()
+        # self.get_svk_bit()
+        self.get_splitbit()
         sbit = self.sbits.pop(0)
         ssat0 = {sbit: 0}
         ssat1 = {sbit: 1}
 
-        b1 = Branch()
+        b1 = Branch(self, f"{self.name}-{sbit}.1", self.sat)
+        b1.sat.update(ssat1)
         chain1 = self.clone_chain(ssat1, sbit)
         for nv, tail in chain1.items():
             b1.add_tail(nv, tail)
+        if not b1.done():
+            b1.split()
 
-        b0 = Branch()
-        chain0 = self.clone_chain(ssat0, sbit)
-        for nv, tail in chain0.items():
-            b0.add_tail(nv, tail)
+        b0 = Branch(self, f"{self.name}-{sbit}.0", self.sat)
+        b0.sat.update(ssat0)
+        # chain0 = self.clone_chain(ssat0, sbit)
+        # for nv, tail in chain0.items():
+        #     b0.add_tail(nv, tail)
 
         return b0, b1
+    
+    def done(self):
+        return False
 
     def clone_chain(self, ssat, sbit):
         nchain = {}
         for nov, tail in self.chain.items():
-            inf0 = tail.metrics()
-            print(f"{nov}:before split:")
-            print(inf0)
             if sbit in tail.bdic:
                 nchain[nov] = tail.clone(ssat, sbit)
                 inf = nchain[nov].metrics()
-                print("after:")
+                print("{nov}:")
                 print(inf)
             else:
                 print(f"after: not cloned")
@@ -82,8 +92,13 @@ class Branch:
                 raise Exception("no more single-vk bit.")
         self.sbits = sorted(self.single_vk_bdic.pop(nv))
         
+    def show_chain(self):
+        print(self.name)
+        for nv in self.novs:
+            msg = self.chain[nv].metrics()
+            print(msg)
 
-    def show_bdic(self):
+    def show_sumbdic(self):
         bits = sorted(self.sumbdic.keys())
         print(f'sumbdic({len(self.sumbdic)}):')
         for b in bits:
@@ -91,23 +106,19 @@ class Branch:
         print()
 
     def get_splitbit(self, choose_tail=False): # choose max tail or max vk2
-        max_dic = {}  # {bid:[max-tails, max-vk2s]}
-        for nov, dic in self.sumbdic.items():
-            for b, lst in dic.items():
-                m = len(lst)
-                pair = max_dic.setdefault(b, [0,0])
-                pair[0] += 1
-                pair[1] += m
-            x = 0
+        # max_dic = {}  # {bid:[max-tails, max-vk2s]}
+            
+            # for b, lst in dic.items():
+            #     m = len(lst)
+            #     pair = max_dic.setdefault(b, [0,0])
+            #     pair[0] += 1
+            #     pair[1] += m
+            # x = 0
         # make choice based on max-tail, or max-vk2
         max_bit = -1
         val = 0
-        for b in max_dic:
-            if choose_tail:
-                xval = max_dic[b][0]
-            else:
-                xval = max_dic[b][1]
-            if xval > val:
+        for b, sz in self.sumbdic.items():
+            if sz > val:
                 max_bit = b
-                val = xval
-        return max_bit
+                val = sz
+        self.sbits = [max_bit]

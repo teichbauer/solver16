@@ -41,7 +41,6 @@ def set_bits(val, d):
         val = set_bit(val, b, v)
     return val
 
-
 def oppo_binary(binary_value):
     return (binary_value + 1) % 2
 

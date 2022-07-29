@@ -64,6 +64,7 @@ class SatNode:
                                 self.vkm)
             return self.next.spawn()
         else:
+            # Center.root_branch.show_chain()
             Center.minnov = self.nov
             Center.root_branch.split()
             # split_bit = Center.root_branch.get_bestbit()
