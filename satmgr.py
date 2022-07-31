@@ -19,7 +19,6 @@ class SatManager:
         if len(sat_cvs_dic) > 0:
             self.add(sat_cvs_dic)
 
-
     def expand_bmap(self, sat_cvs_dic):
         new_sat_cvs_dic = {}
         while len(sat_cvs_dic) > 0:  # bits is a set

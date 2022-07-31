@@ -26,6 +26,7 @@ class Tail:
     def __init__(self, snode, vk2dic, bitdic, sat_cvs_dic=None):
         self.snode = snode
         self.vk2dic = vk2dic
+        self.combos = []
         self.splitbit = -1
         # vk2-bdic : all vk1s will be removed in sort_vks
         self.bdic = self.copy_bdic(bitdic)
@@ -35,11 +36,9 @@ class Tail:
         if Center.root_branch == None:
             Center.root_branch = Branch(None)
         Center.root_branch.add_tail(self.snode.nov, self)
-        pairs = self.vk2_pairs()
-        if pairs:
-            res = [sat_from_pair(vk2a, vk2b) for vk2a, vk2b in pairs]
-            x = 0
-
+        tuple_lst = self.proc_pairs()
+        if tuple_lst:
+            self.pair_sat(tuple_lst)
 
     def sort_vks(self):
         self.cvks_dic = {v: set([]) for v in self.snode.bgrid.chvset }
@@ -73,18 +72,83 @@ class Tail:
         ntail.satmgr.add({splitbit:{split_sat[splitbit]:tuple(range(8))}})
         return ntail
 
-    def vk2_pairs(self):
-        # find pairs of vk2s bitting on the same 2 bits
+    def proc_pairs(self):
+        # find pairs of vk2s (vka, vka) bitting on the same 2 bits, and
+        # vka.cvs vkb.cvs do have intersection
         pairs = []
-        vks = self.vk2dic.values()
+        combo_pairs = []
+        if 'C0115' in self.vk2dic:
+            xx = 9
+        vks = tuple(self.vk2dic.values())
+        length = len(vks)
         i = 0
-        while i < len(vks) - 1:
-            if vks[i].bits == vks[i+1].bits:
-                pairs.append((vks[i], vks[i+1]))
-        
+        while i < length - 1:
+            x = i + 1
+            while x < length:
+                xvk = vks[x]
+                if vks[i].bits == xvk.bits:
+                    if vks[i].dic == xvk.dic:
+                        combo_pairs.append((vks[i],xvk))
+                        # self.proc_combo(vks[i],xvk)
+                    else:
+                        xcvs = vks[i].cvs.intersection(xvk.cvs)  # common cvs
+                        if len(xcvs) > 0:  # vk-i and xvk share xcvs != {}
+                            sat_tpl = sat_from_pair(vks[i], xvk)
+                            if sat_tpl:
+                                pairs.append((vks[i], xvk, sat_tpl, xcvs))
+                x += 1
+            i += 1        
+        for vka, vkb in combo_pairs:
+            self.proc_combo(vka, vkb)
+
         if len(pairs) == 0:
             return None
         return pairs
+
+    def proc_combo(self, vka,vkb):
+        # in case vka and vkb having the same bits and the same dic,
+        # 1. self.combos.append((vk1, vkb))
+        # 2. make a new COMBOn: with uniofied cvs
+        # 3 remove vka and vkb, 
+        # 4. add COMBOn to vk2dic
+        # 5. add COMBOn to self.cvks_dic[cvs]
+        vk2 = vka.clone()
+        # vk2-combo-n, shouldn't be more than 9 if this. So n:0..9
+        vk2.kname = f"COMBO{len(self.combos)}"
+        vk2.cvs = vk2.cvs.union(vkb.cvs)
+        self.remove_vk2(vka)    
+        self.remove_kn2_from_cvk_dic(vka.cvs, vka.kname)
+        self.remove_vk2(vkb)
+        self.remove_kn2_from_cvk_dic(vkb.cvs, vkb.kname)
+        self.combos.append((vka, vkb))
+        self.vk2dic[vk2.kname] = vk2
+        for cv in vk2.cvs:
+            self.cvks_dic[cv].add(vk2.kname)
+        x = 0
+
+
+    def pair_sat(self, pair_tpls): # tpl: (vk-a, vk-b, sat-tpl, comm_cvs)
+        sat_bmap = {}
+        for vka, vkb, stpl, cvs in pair_tpls:
+            vka1 = self.vk2dic[vka.kname].clone()
+            vka1.pop_cvs(cvs)
+            if len(vka1.cvs) == 0:
+                self.remove_vk2(vka)
+            else:
+                self.vk2dic[vka.kname] = vka1
+            self.remove_kn2_from_cvk_dic(cvs, vka.kname)
+            sat_bmap[stpl[0]] = { int(not stpl[1]): cvs }
+
+            vkb1 = self.vk2dic[vkb.kname].clone()
+            vkb1.pop_cvs(cvs)
+            if len(vkb1.cvs) == 0:
+                self.remove_vk2(vkb)
+            else:
+                self.vk2dic[vkb.kname] = vkb1
+            self.remove_kn2_from_cvk_dic(cvs, vkb.kname)
+            sat_bmap[stpl[0]] = { int(not stpl[1]): cvs }
+
+        self.satmgr.add(sat_bmap)
 
 
     def bdic_info(self):

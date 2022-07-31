@@ -1,3 +1,6 @@
+## 2022-07-30->0.331
+- tail.combos[] for the case: vka/vkb with the smae dic
+- handle vka/vkb with the same bits, but resulting a new sat(1 value differs)
 ## 2022-07-28->0.330
 - progressing
 ## 2022-07-23->0.329
