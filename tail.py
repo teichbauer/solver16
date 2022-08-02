@@ -39,6 +39,7 @@ class Tail:
         tuple_lst = self.proc_pairs()
         if tuple_lst:
             self.pair_sat(tuple_lst)
+        self.eval_combos()
 
     def sort_vks(self):
         self.cvks_dic = {v: set([]) for v in self.snode.bgrid.chvset }
@@ -88,8 +89,7 @@ class Tail:
                 xvk = vks[x]
                 if vks[i].bits == xvk.bits:
                     if vks[i].dic == xvk.dic:
-                        combo_pairs.append((vks[i],xvk))
-                        # self.proc_combo(vks[i],xvk)
+                        combo_pairs.append((vks[i], xvk))
                     else:
                         xcvs = vks[i].cvs.intersection(xvk.cvs)  # common cvs
                         if len(xcvs) > 0:  # vk-i and xvk share xcvs != {}
@@ -99,13 +99,13 @@ class Tail:
                 x += 1
             i += 1        
         for vka, vkb in combo_pairs:
-            self.proc_combo(vka, vkb)
+            self.set_combo(vka, vkb)
 
         if len(pairs) == 0:
             return None
         return pairs
 
-    def proc_combo(self, vka,vkb):
+    def set_combo(self, vka, vkb):
         # in case vka and vkb having the same bits and the same dic,
         # 1. self.combos.append((vk1, vkb))
         # 2. make a new COMBOn: with uniofied cvs
@@ -122,8 +122,29 @@ class Tail:
         self.remove_kn2_from_cvk_dic(vkb.cvs, vkb.kname)
         self.combos.append((vka, vkb))
         self.vk2dic[vk2.kname] = vk2
-        for cv in vk2.cvs:
-            self.cvks_dic[cv].add(vk2.kname)
+        x = 0
+
+    def eval_combos(self):
+        sat_bmap = {}
+        for index, com_pair in enumerate(self.combos):
+            vk2 = self.vk2dic[f'COMBO{index}']
+            satbits = set(self.satmgr.sat_cvs_dic).intersection(vk2.bits)
+            for sb in satbits:
+                bv_dic = self.satmgr.sat_cvs_dic[sb]
+                for bv, cvs in bv_dic.items():
+                    xcvs = vk2.cvs.intersection(cvs)
+                    vk2.pop_cvs(cvs)
+                    if vk2.dic[sb] == bv:
+                        if len(xcvs) > 0:
+                            vk1 = vk2.clone([sb])
+                            b, v = vk1.hbit_value()
+                            sat_bmap[b] = { int(not v): xcvs }
+                    else:
+                        x = 9
+                x = 9
+            for cv in vk2.cvs:
+                self.cvks_dic[cv].add(vk2.kname)
+            x = 9
         x = 0
 
 
@@ -169,6 +190,11 @@ class Tail:
 
     def proc_svks(self, bits):
         x = 1
+
+    def add_vk2(self, vk2):
+        self.vk2dic[vk2.kname] = vk2
+        for cv in vk2.cvs:
+            self.cvks_dic[cv].add(vk2.kname)
 
     def remove_kn2_from_cvk_dic(self, cvs, kn2):
         for cv in cvs:
