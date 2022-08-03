@@ -125,27 +125,32 @@ class Tail:
         x = 0
 
     def eval_combos(self):
+        # for every combon vk2, if its bits overlpas with any existing 
+        # sat in satmgr: 
+        # 1. pop off the sat-cvs
+        # 2. if b in bits: for each bv in sat[b]:{bv0: cvs0, bv1: cvs1}
+        #    if vk2[b] == bv, vk2 will create new sat
+        # 3. put vk2.kname for all vk2.cvs in self.cvks_dic
+        # -------------------------------------------------------------
         sat_bmap = {}
-        for index, com_pair in enumerate(self.combos):
+        for index in range(len(self.combos)):
             vk2 = self.vk2dic[f'COMBO{index}']
             satbits = set(self.satmgr.sat_cvs_dic).intersection(vk2.bits)
             for sb in satbits:
-                bv_dic = self.satmgr.sat_cvs_dic[sb]
-                for bv, cvs in bv_dic.items():
+                for bv, cvs in self.satmgr.sat_cvs_dic[sb].items():
+                    # bv: val on the sat bit, covering cvs
                     xcvs = vk2.cvs.intersection(cvs)
-                    vk2.pop_cvs(cvs)
-                    if vk2.dic[sb] == bv:
+                    vk2.pop_cvs(xcvs)
+                    if vk2.dic[sb] == bv: 
                         if len(xcvs) > 0:
                             vk1 = vk2.clone([sb])
-                            b, v = vk1.hbit_value()
-                            sat_bmap[b] = { int(not v): xcvs }
-                    else:
-                        x = 9
-                x = 9
+                            b, v = vk1.sat1()
+                            sat_bmap[b] = { v: xcvs }
             for cv in vk2.cvs:
                 self.cvks_dic[cv].add(vk2.kname)
             x = 9
-        x = 0
+        if len(sat_bmap) > 0:
+            self.satmgr.add(sat_bmap)
 
 
     def pair_sat(self, pair_tpls): # tpl: (vk-a, vk-b, sat-tpl, comm_cvs)
@@ -158,7 +163,6 @@ class Tail:
             else:
                 self.vk2dic[vka.kname] = vka1
             self.remove_kn2_from_cvk_dic(cvs, vka.kname)
-            sat_bmap[stpl[0]] = { int(not stpl[1]): cvs }
 
             vkb1 = self.vk2dic[vkb.kname].clone()
             vkb1.pop_cvs(cvs)
@@ -167,6 +171,7 @@ class Tail:
             else:
                 self.vk2dic[vkb.kname] = vkb1
             self.remove_kn2_from_cvk_dic(cvs, vkb.kname)
+            
             sat_bmap[stpl[0]] = { int(not stpl[1]): cvs }
 
         self.satmgr.add(sat_bmap)

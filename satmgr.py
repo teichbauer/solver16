@@ -50,6 +50,6 @@ class SatManager:
                             continue
                         vk1 = vk2_clone.clone([bit])
                         b, v = vk1.sat1()
-                        lst = new_sat_cvs_dic.setdefault(b,{})[v] = comm_cvs
+                        new_sat_cvs_dic.setdefault(b,{})[v] = comm_cvs
         return new_sat_cvs_dic
 

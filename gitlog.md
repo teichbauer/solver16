@@ -1,3 +1,9 @@
+## 2022-08-02->0.334
+- polishing/fixes in satmgr, tail
+- doc: display chain before split -> docs/0333.info.txt
+## 2022-08-02->0.333
+- finished tail.eval_combos - if a new combo-vk2 has any bit overlapping with
+  satmgr.sat_cvs_dic bit, evaluate it.
 ## 2022-08-01->0.332
 - combon vk2 can have cvs that some sats in tail.satmgr.sat_cvs_dic cover
   and this may generate new sat, or reduce cvs in the combo-vk2.cvs
