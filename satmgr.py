@@ -53,3 +53,10 @@ class SatManager:
                         new_sat_cvs_dic.setdefault(b,{})[v] = comm_cvs
         return new_sat_cvs_dic
 
+    def clone_sat_cvs_dic(self):
+        dic = {}
+        for b, d in self.sat_cvs_dic.items():
+            dic[b] = {}
+            for bv, cvs in d.items():
+                dic.setdefault(b, {})[bv] = cvs.copy()
+        return dic

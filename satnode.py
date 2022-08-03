@@ -67,8 +67,6 @@ class SatNode:
             # Center.root_branch.show_chain()
             Center.minnov = self.nov
             Center.root_branch.split()
-            # split_bit = Center.root_branch.get_bestbit()
-            # brch10, brch11 = Center.root_branch.split(split_bit)
             x = 1
 
     def make_vk12mdic(self, sumvkdic):

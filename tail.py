@@ -68,8 +68,7 @@ class Tail:
         ntail.splitbit = splitbit
         ntail.cvks_dic = self.copy_cvks_dic(self.cvks_dic)
         ntail.satmgr = SatManager(ntail) # self.satmgr.clone(ntail)
-        ntail.satmgr.add(self.satmgr.sat_cvs_dic)
-        # ntail.satmgr.add({splitbit:[(tuple(range(8)), split_sat)]})
+        ntail.satmgr.sat_cvs_dic = self.satmgr.clone_sat_cvs_dic()
         ntail.satmgr.add({splitbit:{split_sat[splitbit]:tuple(range(8))}})
         return ntail
 
@@ -171,7 +170,7 @@ class Tail:
             else:
                 self.vk2dic[vkb.kname] = vkb1
             self.remove_kn2_from_cvk_dic(cvs, vkb.kname)
-            
+
             sat_bmap[stpl[0]] = { int(not stpl[1]): cvs }
 
         self.satmgr.add(sat_bmap)
